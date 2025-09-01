@@ -1,0 +1,42 @@
+{% extends "layout.html" %}
+
+{% block style %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='main_style.css') }}">
+  <link rel="stylesheet" 
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+{% endblock %}
+
+{% block main %}
+  <main class="container text-center py-5">
+    <div class="container text-center py-5" 
+    style="background: linear-gradient(135deg, #edf2fb, #bfc6d3, #cfdef3); 
+    border-radius: 15px; border: 1px solid linear gradient (90 deg, #ffffff, 25% #d1d5db)">
+      <h2 class="mb-4">
+        <strong>
+          Bienvenue sur <span style="color:#007bff;">Law and Code</span> !
+        </strong>
+      </h2>
+      <p class="lead mb-4">Testez vos connaissances juridiques ou créez votre propre quiz !</p>
+      <div class="container d-flex justify-content-center gap-3 mobile-column">
+        <a href="{{ url_for('quiz.choix', quiz_type='public') }}" class="btn btn-primary btn-lg shadow" 
+        style="background: linear-gradient(90deg, #4f8cff 0%, #1e3c72 100%); border: none;">
+          <i class="fas fa-gavel me-2"></i> 
+          Le Jurisquiz
+        </a>
+        <a href="{{ url_for('quiz.choose_file') }}" class="btn btn-success btn-lg shadow" 
+        style="background: linear-gradient(90deg, #198754, #43e97b 99% ); border: none;">
+          <i class="fas fa-plus-circle me-2"></i> 
+          Gérer mes Quiz
+        </a>
+        <a href="{{ url_for('main.about') }}" class="btn btn-info btn-lg shadow" 
+        style="background: linear-gradient(90deg, #66a6ff 60%, #6aa6fa 90%); border: none;">
+          <i class="fas fa-info-circle me-2"></i> 
+          À Propos
+        </a>
+      </div>
+    </div>
+  </main>
+{% endblock %}
+
+
+

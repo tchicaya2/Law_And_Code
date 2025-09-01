@@ -1,0 +1,42 @@
+{% extends "layout.html" %}
+
+{% block style %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='main_style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='view_messages.css') }}">
+{% endblock %}
+
+{% block title %}
+    Messages
+{% endblock %}
+
+{% block main %}
+    <div class="section">
+        <h2>Messages</h2>
+        {% if messages %}
+            <table>
+                <thead>
+                    <tr>
+                        <th><strong>Nom</strong></th>
+                        <th><strong>Message</strong></th>
+                        <th><strong>Téléphone</strong></th>
+                        <th><strong>Email</strong></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for message in messages %}
+                    <tr>
+                        <td>{{ message[0] }}</td>
+                        <td>{{ message[1] }}</td>
+                        <td>{{ message[2] }}</td>
+                        <td>{{ message[4] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="alert alert-info" role="alert">
+                Rien à afficher ici pour l'instant.
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

@@ -1,0 +1,52 @@
+.search-bar input[type="text"],
+.search-bar button {
+  height: 48px; /* même hauteur pour les deux */
+  box-sizing: border-box; /* pour inclure padding et border dans la hauteur */
+}
+
+.search-bar button {
+  background: linear-gradient(90deg, #4f8cff 0%, #1e3c72 100%);
+  color: white;
+  border: none;
+  border-radius: 0 8px 8px 0; /* arrondi à droite */
+  padding: 0 22px; /* padding horizontal */
+  font-size: 1.2em;
+  cursor: pointer; /* curseur pointeur pour indiquer que c'est cliquable */
+  transition: background 0.2s; /* transition pour l'effet hover */
+  display: flex; /* pour centrer l'icône */
+  align-items: center; /* pour centrer verticalement */
+  justify-content: center; /* pour centrer horizontalement */
+}
+
+.search-bar input[type="text"] {
+  flex: 1;
+  padding: 0 16px;
+  font-size: 1.1em;
+  border: 1.5px solid #bfc6d3;
+  border-radius: 8px 0 0 8px;
+  outline: none;
+  transition: border-color 0.2s;
+  background: #f8fafc;
+}
+
+.search-bar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 70vw;
+  max-width: 700px;
+  margin: 0 auto 24px auto;
+}
+
+.search-bar input[type="text"]:focus {
+  border-color: #477bff;
+}
+
+
+.search-bar button:hover {
+  background: #355ec9;
+}
+
+.search-bar i.fa-search {
+  font-size: 1.2em;
+}

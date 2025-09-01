@@ -1,0 +1,10 @@
+Flask
+Flask-Session
+Flask-Cors
+requests
+werkzeug
+psycopg2-binary
+python-dotenv
+gunicorn
+Flask-Mail
+itsdangerous

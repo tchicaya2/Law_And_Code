@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "5001:5000"
+    env_file:
+      - .env
+    dns:
+      - 2001:4860:4860::8888  # Google DNS IPv6
+      - 2001:4860:4860::8844  # Google DNS IPv6 secondaire
+      - 8.8.8.8               # Google DNS IPv4 de fallback
+      - 8.8.4.4               # Google DNS IPv4 secondaire
+    sysctls:
+      - net.ipv6.conf.all.disable_ipv6=0  # Active IPv6
+
+networks:
+  default:
+    driver: bridge
+    enable_ipv6: true
+    ipam:
+      config:
+        - subnet: "2001:db8::/32"
+
+

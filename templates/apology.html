@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+
+{% block style %} 
+  <link rel="stylesheet" href="{{ url_for('static', filename='main_style.css') }}"> 
+{% endblock %}
+
+{% block main %}
+  <main class="container py-5 text-center">
+    <!-- https://memegen.link/ -->
+    <!-- https://knowyourmeme.com/memes/grumpy-cat -->
+    <img alt="{{ top }}" class="border img-fluid" 
+    src="https://api.memegen.link/images/custom/{{ top | urlencode }}/{{ bottom | urlencode }}.jpg?background=https://i.imgur.com/CsCgN7Ll.png&width=400" 
+    title="{{ top }}">
+
+  </main>
+{% endblock %}

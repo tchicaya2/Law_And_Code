@@ -1,0 +1,162 @@
+{% extends "layout.html" %}
+
+{% block style %} 
+    <link rel="stylesheet" href="{{ url_for('static', filename='main_style.css') }}">
+{% endblock %}
+
+{% block script %}
+    <script src="{{ url_for('static', filename='manageFile.js') }}"></script>
+{% endblock %}
+
+{% block main %}
+
+  <main style="display: flex; justify-content: center; align-items: center; flex-direction: column;">
+
+    <h3 class="fw-bold" style="padding-top: 40px;">Choisir un dossier</h3>
+    <section class="container text-center py-5" 
+    style="display: flex; justify-content: center; align-items: center; 
+    flex-direction: column; margin-top: 10px; 
+    background: linear-gradient(135deg, #e6ecf7, #d9dee8, #b3b6bb, #bfc6d3, #cfdef1); 
+    border-radius: 15px;">
+        <div style="display: flex; justify-content: center; 
+        align-items: center; width: 70vw;" id="nouveau_dossier">
+            <label class="réponse dossier-field" 
+            style="display: block; width: 100%; text-align: center; font-size: 1.2em;">
+                Nouveau quiz
+            </label>
+        </div>
+        <form id="createdoc" class="mt-4" 
+        style="display: flex; flex-direction: column; justify-content: center; 
+        align-items: center; width: 70vw;" action="{{ url_for('quiz.create_new_quiz_file') }}" 
+        method="post" hidden>
+            <div style="display: flex; justify-content: center; 
+            align-items: center; width: 70vw;">
+                <input autocomplete=off class="form-control dossier-field" 
+                style="display: inline-block; width: 40%; text-align: center;" 
+                name="dossier" placeholder="Titre du quiz" type="text" required>
+            </div>
+            <div class="mt-2" style="display: flex; justify-content: center; 
+            align-items: center; width: 60vw;">
+                <select name="matiere" class="form-select">
+                <option disabled selected value="">Matière</option>
+                {% for matiere in matieres %}
+                    <option value="{{ matiere }}">{{ matiere }}</option>
+                {% endfor %}
+                </select>
+            </div>
+            <div class="mt-2" style="display: flex; justify-content: center; 
+            align-items: center; width: 60vw;">
+                <select name="niveau" class="form-select">
+                <option disabled selected value="">Niveau</option>
+                {% for niveau in niveaux %}
+                    <option value="{{ niveau }}">{{ niveau }}</option>
+                {% endfor %}
+                </select>
+            </div>
+            <button class="btn btn-primary mt-2 dossier-field" 
+            style="display: flex; justify-content: center; align-items: center; 
+            width: 40%; background: linear-gradient(90deg, #00bcd4, #0097a7); 
+            border: none;" type="submit">
+                Créer un nouveau quiz
+            </button>
+        </form>
+        {% if dossiers %}
+            {% for dossier in dossiers %}
+            
+                <div style="display: flex; justify-content: space-between; 
+                gap: 20px; align-items: center; margin-top: 10px; width: 70vw; 
+                position: relative;">
+                    <!-- Bouton supprimer (mobile - croix) -->
+                    <a href="{{ url_for('quiz.delete_file', dossier=dossier[0]) }}" 
+                    name="{{ dossier[0] }}" class="delete-cross mobile-only delete_file">
+                        <div>&times;</div>
+                    </a>
+                    
+                    <div style="text-align: center;  width: 100%;">
+                        <a href="{{ url_for('quiz.modify_quiz_questions', dossier=dossier[0], matiere=dossier[1]) }}" 
+                        style="text-decoration: none; color: inherit;">
+                            <label class="réponse dossier-field" 
+                            style="display: block; text-align: center; font-size: 1.2em;">
+                                {{ dossier[0] }}
+                            </label>
+                        </a>
+                    </div>
+                    <div class="btns-actions d-flex justify-content-center 
+                    gap-3 desktop-only" style="min-width: 200px;">
+                        <a class="delete_file" 
+                        href="{{ url_for('quiz.delete_file', dossier=dossier[0]) }}" 
+                        name="{{ dossier[0] }}" style="text-decoration: none;">
+                            <button class="btn btn-danger btn-action" 
+                            style="background: linear-gradient(90deg, #dc3545, #f64f43 125%);
+                             border: none;" type="button">
+                                Supprimer
+                            </button>
+                        </a>
+                        <a class="renommer">
+                            <button class="btn btn-info btn-action" 
+                            style="background: linear-gradient(90deg, #00bcd4, #0097a7); 
+                            border: none;" type="button">
+                                Renommer
+                            </button>
+                        </a>
+                    </div>
+                        <!-- Bouton renommer (mobile - en bas à droite) -->
+                    <a class="renommer rename-mobile mobile-only">
+                        <div>✏️</div>
+                    </a>
+                </div>
+                <form class="mt-4 renamedoc" style="display: flex; flex-direction: column; 
+                justify-content: center; align-items: center; width: 70vw;" 
+                action="{{ url_for('quiz.rename_file', dossier=dossier[0]) }}" 
+                method="post" hidden>
+                    <div style="display: flex; justify-content: center; align-items: center; 
+                    width: 70vw;">
+                        <input autocomplete=off class="form-control" 
+                        style="display: inline-block; width: 50%; text-align: center;" 
+                        name="newName" placeholder="Nouveau nom" type="text" required>
+                    </div>
+                    <button class="btn btn-primary mt-2 dossier-field" 
+                    style="display: flex; justify-content: center; align-items: center; 
+                    width: 40%; background: linear-gradient(90deg, #00bcd4, #0097a7); 
+                    border: none;" type="submit">
+                        Renommer le dossier
+                    </button>
+                </form>
+
+            {% endfor %}
+        {% endif %}
+    </section>
+    <div id="confirm_deletion" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; 
+    background: rgba(30, 41, 59, 0.45); display: flex; justify-content: center; 
+    align-items: center; z-index: 9999;" hidden>
+        <div style="background: linear-gradient(135deg, #e6ecf7 60%, #bfc6d3 100%); 
+        border-radius: 20px; box-shadow: 0 8px 32px rgba(30,41,59,0.18); 
+        padding: 44px 36px 36px 36px; min-width: 340px; max-width: 90vw; text-align: center; 
+        border: 1px solid #bfc6d3; position: relative;">
+            <h3 style="margin-top: 0; color: #dc3545; font-weight: 700; font-size: 1.35em;">
+                Supprimer le dossier 
+                <span id="file_to_delete" style="color: #0097a7;"></span> ?
+            </h3>
+            <p style="color: #6c757d; margin-bottom: 32px; font-size: 1.08em;">
+                Cette action est <b>irréversible</b>.
+            </p>
+            <div style="display: flex; justify-content: center; gap: 24px;">
+                <a class="endbuttons" id="deletion_confirmed" 
+                style="background: linear-gradient(90deg, #dc3545, #f64f43 125%); 
+                color: #fff; padding: 12px 34px; border-radius: 10px; font-weight: 600; 
+                text-decoration: none; box-shadow: 0 2px 8px rgba(220,53,69,0.10); 
+                font-size: 1.08em; border: none; transition: background 0.2s, box-shadow 0.2s;">
+                    Supprimer
+                </a>
+                <a class="endbuttons" id="deletion_cancelled" 
+                style="background: #e6ecf7; color: #333; padding: 12px 34px; 
+                border-radius: 10px; font-weight: 600; text-decoration: none; 
+                border: 1px solid #bfc6d3; font-size: 1.08em; 
+                transition: background 0.2s, border 0.2s;">
+                    Annuler
+                </a>
+            </div>
+        </div>
+    </div>
+  </main>
+{% endblock %} 

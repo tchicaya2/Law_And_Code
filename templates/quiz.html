@@ -1,0 +1,133 @@
+{% extends "layout.html" %}
+
+{% block style %}
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" 
+  rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='quiz_page.css') }}">
+{% endblock %}
+
+{% block script %}
+  <script src="{{ url_for('static', filename='quizlogic.js') }}"></script>
+{% endblock %}
+
+{% block main %}
+  <main class="jurisquiz_main">
+    <div id="quiztype" hidden>{{type}}</div>
+    <div id="matiere" hidden>{{matiere}}</div>
+    <div id="author_id" hidden>{{author_id}}</div>
+    <div id="quiz_id" hidden>{{quiz_id}}</div>
+    <div id="player_id" hidden>{{session.get("user_id")}}</div>
+    <h2 id="titre">{{titre}}</h2>
+    
+    <!-- Barre de progression -->
+    <div class="progress-container">
+      <div class="progress-header">
+        <span class="progress-text">Progression</span>
+        <span class="progress-text" id="progress-text">0 / 0</span>
+      </div>
+      <div class="progress-bar-container">
+        <div class="progress-bar" id="progress-bar" style="width: 0%"></div>
+      </div>
+    </div>
+    
+    <div class="score-container">
+      <div class="score-box">Score : <span id="score"></span></div>
+      <div class="essais-box">Essais restants : <span id="essais"></span></div>
+    </div>
+    <div>
+      <h1 id="feedback" role="alert"></h1>
+    </div>
+    <h4 class="attendu" id="principe"><strong></strong></h4>
+    <div class="fin" id="fin" hidden>
+      <h3>Tu as répondu à toutes les questions du quiz ! 👨‍⚖️</h3>
+      <div style="margin-top: 25px;">
+        <h3>Ton score : <span id="final_score"></span></h3>
+      </div>
+      <div class="restart">
+        {% if type == "public" %}
+          {% if already_liked %}
+            <button id="like-button" class="endbuttons" disabled 
+            style="background-color: lightcoral;font-size:1.2em;">
+              J'aime déjà 🤍
+            </button>
+          {% else %}
+            <button id="like-button" class="endbuttons" style="background-color: lightcoral;
+          font-size:1.2em;">
+              &#x1F90D; Aimer ce Quiz
+            </button>
+          {% endif %}
+        {% endif %}
+
+        <a href="{{ url_for('quiz.quiz', type=type, titre=titre, quiz_id=quiz_id, matiere=matiere, auteur=author_id) }}" 
+        class="endbuttons" style="background-color: green;">
+          Rejouer ce Quiz
+        </a>
+        <a href="{{ url_for('quiz.choix', quiz_type=type) }}" class="endbuttons" 
+        style="background-color: yellowgreen;">
+          Choisir un autre Quiz
+        </a>
+        <a href="{{ url_for('main.index') }}" class="endbuttons">
+          Menu principal
+        </a>
+      </div>
+    </div>
+    <div class="noidea" id="les_réponses">
+      <div class="reponses">
+        <input type="radio" class="choix" name="choix" id="choix1" value="1"/>
+        <label id="r1" class="réponse" for="choix1"></label>
+      </div>
+      <div class="reponses">
+        <input type="radio" class="choix" name="choix" id="choix2" value="2"/>
+        <label id="r2" class="réponse" for="choix2"></label>
+      </div>
+      <div class="reponses">
+        <input type="radio" class="choix" name="choix" id="choix3" value="3"/>
+        <label id="r3" class="réponse" for="choix3"></label>
+      </div>
+      <div class="reponses">
+        <input type="radio" class="choix" name="choix" id="choix4" value="4"/>
+        <label id="r4" class="réponse" for="choix4"></label>
+      </div>
+    </div>
+    <button class="suivant" id="suivant" type="submit" value="Suivant">
+      Suivant
+    </button>
+    <span id="question-number"></span>
+  </main>
+  <script>
+      window.quizType = document.getElementById("quiztype").textContent;
+      if (window.quizType == "public"){
+          window.collectArretsRoute = "{{ url_for('quiz.get_public_questions') }}";
+      } else if (window.quizType == "private") {
+          window.collectArretsRoute = "{{ url_for('quiz.get_private_questions') }}";
+      }
+      window.quizlengtherrorRoute = "{{ url_for('quiz.quizlengtherror') }}";
+      
+      document.addEventListener("DOMContentLoaded", function() {
+          likeButton = document.getElementById("like-button");
+          likeButton.addEventListener("click", function() {
+              const titre = document.querySelector("#titre").textContent;
+              const author_id = document.getElementById("author_id").textContent;
+              const quiz_id = document.getElementById("quiz_id").textContent;
+
+              fetch("{{ url_for('quiz.like_quiz') }}", {
+                  method: "POST",
+                  headers: {
+                      "Content-Type": "application/json"
+                  },
+                  body: JSON.stringify({ titre: titre, author_id: author_id, })
+              })
+              .then(response => response.json())
+              .then(data => {
+                  if (data.success) {
+                      likeButton.textContent = "Merci ! 🤍";
+                      likeButton.disabled = true;
+                  } else {
+                      alert("Une erreur s'est produite. Veuillez réessayer.");
+                  }
+              });
+          });
+      });
+  </script>
+
+{% endblock %}

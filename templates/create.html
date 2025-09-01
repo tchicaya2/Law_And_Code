@@ -1,0 +1,56 @@
+{% extends "layout.html" %}
+
+{% block style %} 
+  <link rel="stylesheet" href="{{ url_for('static', filename='styling.css') }}"> 
+{% endblock %}
+
+{% block main %}
+  <main class="container py-5 text-center">
+    <h2 class="fw-bold" id="dossier">{{ dossier }}</h2>
+    {% if message %}
+      <div id="flash-message" class="alert alert-success text-center" role="alert" 
+      style="margin-top: 50px;">
+        {{ message }}
+      </div>
+    {% endif %}
+    <section class="container text-center py-5" style="display: flex; justify-content: center; 
+    align-items: center; flex-direction: column; margin-top: 10px; 
+    background: linear-gradient(135deg, #e6ecf7, #d9dee8, #b3b6bb, #bfc6d3, #cfdef1); 
+    border-radius: 15px; 
+    border: 1px solid linear gradient (90 deg, #e6ecf7, #d9dee8, #edf2fb, #bfc6d3, #cfdef3)">
+      <form action="{{ url_for('quiz.add_new_question', dossier=dossier) }}" method="post" style="width: 80vw">
+          <div class="mb-3">
+              <label for="message" class="form-label">Question</label>
+              <textarea style="border: none;" class="form-control" name="question" 
+              rows="5" placeholder="Entrez le principe" required>
+            </textarea>
+          </div>
+          <div class="mb-3">
+              <label for="message" class="form-label">Réponse</label>
+              <textarea style="border: none;" class="form-control" name="réponse" 
+              rows="5" placeholder="Entrez la référence du principe" required>
+            </textarea>
+          </div>
+          <button class="btn btn-primary" 
+          style="background: linear-gradient(90deg, #00bcd4, #0097a7); border: none;" 
+          type="submit">
+            Enregistrer
+          </button>
+      </form>
+      <a href=" {{ url_for('quiz.private_choice') }}">
+        <button class="btn btn-primary mt-4">
+          Voir mes Quiz
+        </button>
+      </a>
+      <a href="{{ url_for('quiz.modify_quiz_questions', dossier=dossier) }}" 
+      method="get">
+        <button class="btn btn-primary mt-4">
+          Voir les questions du Quiz
+        </button>
+      </a>
+    </section>
+  </main>
+
+{% endblock %}
+
+

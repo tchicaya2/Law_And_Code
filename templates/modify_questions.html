@@ -1,0 +1,228 @@
+{% extends "layout.html" %}
+
+{% block style %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='main_style.css') }}">
+  <link rel="stylesheet" 
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* Style pour le bouton "Jouer ce quiz" */
+    .play-quiz-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, #28a745, #20c997);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1rem;
+      border: none;
+      box-shadow: 0 2px 8px rgba(40, 167, 69, 0.2);
+      transition: all 0.3s ease;
+      margin-bottom: 24px;
+    }
+    
+    .play-quiz-btn:hover {
+      background: linear-gradient(135deg, #218838, #1abc9c);
+      box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+      transform: translateY(-1px);
+      color: white;
+      text-decoration: none;
+    }
+    
+    .play-quiz-btn i {
+      font-size: 1.1em;
+    }
+    
+    /* Container pour aligner le bouton à gauche */
+    .header-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 32px;
+      gap: 16px;
+    }
+    
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    
+    .header-right {
+      flex-shrink: 0;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .header-controls {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 16px;
+      }
+      
+      .header-left {
+        justify-content: center;
+      }
+      
+      .header-right {
+        align-self: center;
+      }
+      
+      .play-quiz-btn {
+        justify-content: center;
+        width: 100%;
+        max-width: 250px;
+      }
+    }
+  </style>
+{% endblock %}
+
+{% block script %}
+  <script src="{{ url_for('static', filename='textMaxLenght.js') }}"></script>
+  <script src="{{ url_for('static', filename='manageQuestion.js') }}"></script>
+{% endblock %}
+
+{% block main %}
+  <main class="container py-3 text-center">
+
+    <h2 class="fw-bold mb-4" id="dossier">{{ dossier }}</h2>
+    <span id="matiere" hidden>{{ matiere }}</span>
+    
+    <!-- Container pour les contrôles d'en-tête -->
+    <div class="header-controls">
+    {% if questions|length > 3 %}
+        <!-- Bouton "Jouer ce quiz" à gauche -->
+        <div class="header-left">
+          <a href="{{ url_for('quiz.quiz', titre=dossier, matiere=matiere, type=access, auteur=session.get('username')) }}" 
+          class="play-quiz-btn">
+            <i class="fas fa-play"></i>
+            Tester mon quiz
+          </a>
+        </div>
+    {% endif %}
+      
+      <!-- Formulaire de modification d'accès à droite -->
+      <div class="header-right">
+        <form action="{{ url_for('quiz.modify_quiz_accessibility') }}" 
+        method="post" style="display: flex; gap: 12px; align-items: center;">
+          <input type="hidden" name="titre" value="{{ dossier }}">
+          <input type="hidden" name="matiere" value="{{ matiere }}">
+          <select name="type" class="form-select" required style="min-width: 140px;">
+            <option value="" disabled selected>Accès 
+              {% if access == "private" %}
+                Privé
+              {% else %}
+                {{ access.capitalize() }}
+              {% endif %}
+            </option>
+            <option value="public">Accès Public</option>
+            <option value="private">Accès Privé</option>
+          </select>
+          <button type="submit" class="btn btn-primary" style="min-width: 120px;">
+            Modifier
+          </button>
+        </form>
+      </div>
+    </div>
+
+    {% if not questions %}
+      <div class="container text-center py-5" style="background: linear-gradient(135deg, 
+      #e6ecf7, #d9dee8, #b3b6bb, #bfc6d3, #cfdef1); border-radius: 15px; 
+      border: 1px solid linear-gradient(90deg, #e6ecf7, #d9dee8, #edf2fb, #bfc6d3, 
+      #cfdef3)">
+        <div class="alert alert-info text-center" role="alert" style="font-size: 1.1rem;">
+          Ce dossier est vide pour l'instant. Vous pouvez ajouter des questions en utilisant le bouton ci-dessous.
+        </div>
+      </div>
+    {% endif %}
+
+    {% for question in questions %}
+        <section class="container text-center py-3" style="display: flex; 
+        justify-content: center; align-items: center; flex-direction: column; margin-top: 10px; 
+         background: linear-gradient(135deg, #e6ecf7, #d9dee8, #b3b6bb, #bfc6d3, 
+         #cfdef1); border-radius: 15px; border: 1px solid linear gradient (90 deg, #e6ecf7, 
+         #d9dee8, #edf2fb, #bfc6d3, #cfdef3)">
+          <form action="{{ url_for('quiz.modify_quiz_questions', dossier=dossier, matiere=matiere) }}" 
+          method="post" style="width: 80vw" data-index="{{ loop.index }}">
+              <div class="mb-3" style="position: relative;">
+                  <label for="message" class="form-label">
+                    Question {{ loop.index }}
+                  </label>
+                  <input name="initial_question" type="hidden" value="{{ question[0] }}">
+                  <textarea style="border: none;" class="form-control" name="question" rows="3" 
+                  placeholder="Entrez le principe" maxlength="500" required>{{ question[0] }}</textarea>
+                  <div class="char-count">0 / 500</div>
+              </div>
+              <div class="mb-3" style="position: relative;">
+                  <label for="message" class="form-label">
+                    Réponse {{ loop.index }}
+                  </label>
+                  <input name="initial_answer" type="hidden" value="{{ question[1] }}">
+                  <textarea style="border: none;" class="form-control" name="réponse" rows="3" placeholder=
+                  "Entrez la référence du principe" maxlength="200" required>{{ question[1] }}</textarea>
+                  <div class="char-count">0 / 200</div>
+              </div>
+              <button class="btn btn-primary" style="background: linear-gradient(90deg, 
+              #00bcd4, #0097a7); border: none;" type="submit">
+                Modifier
+              </button>
+          </form>
+          <form action="{{ url_for('quiz.delete_quiz_questions') }}" method="post" 
+          style="display: inline; margin-top: 10px">
+              <input type="hidden" name="dossier" value="{{ dossier }}">
+              <input type="hidden" name="matiere" value="{{ matiere }}">
+              <input type="hidden" name="question" value="{{ question[0] }}">
+              <input type="hidden" name="réponse" value="{{ question[1] }}">
+              <button class="btn btn-danger delete_question" style="background: linear-gradient(90deg,
+               #dc3545, #f64f43 125%); border: none;" type="submit">
+                Supprimer
+              </button>
+          </form>
+        </section>
+    {% endfor %}
+
+    <span id="question-count" hidden>{{ questions|length }}</span>
+    <div id="confirm_deletion" class="fin" style="position: fixed; top: 50%; 
+    left: 50%; transform: translate(-50%, -50%); width: 100vw; height: 100vh; 
+    background: rgba(30, 41, 59, 0.45); display: flex; justify-content: center; 
+    align-items: center; z-index: 9999;" hidden>
+        <div style="background: linear-gradient(135deg, #e6ecf7 60%, #bfc6d3 100%); 
+        border-radius: 20px; box-shadow: 0 8px 32px rgba(30,41,59,0.18); 
+        padding: 44px 36px 36px 36px; min-width: 340px; max-width: 90vw; 
+        text-align: center; border: 1px solid #bfc6d3; position: relative;">
+            <h3 style="margin-top: 0; color: #dc3545; font-weight: 700; font-size: 1.35em;">
+               Supprimer la question 
+               <span id="question_number"></span> ?
+            </h3>
+            <p style="color: #6c757d; margin-bottom: 32px; font-size: 1.08em;">
+              Cette action est <b>irréversible</b>.</p>
+            <div style="display: flex; justify-content: center; gap: 24px;">
+                <a class="endbuttons" id="deletion_confirmed" 
+                style="background: linear-gradient(90deg, #dc3545, #f64f43 125%); 
+                color: #fff; padding: 12px 34px; border-radius: 10px; font-weight: 600;
+                text-decoration: none; box-shadow: 0 2px 8px rgba(220,53,69,0.10); 
+                font-size: 1.08em; border: none; transition: background 0.2s, box-shadow 0.2s;">
+                  Supprimer
+                </a>
+                <a class="endbuttons" id="deletion_cancelled" 
+                style="background: #e6ecf7; color: #333; padding: 12px 34px; 
+                border-radius: 10px; font-weight: 600; text-decoration: none; 
+                border: 1px solid #bfc6d3; font-size: 1.08em; transition: background 0.2s, 
+                border 0.2s;">
+                  Annuler
+                </a>
+            </div>
+        </div>
+    </div>
+    <div id="new-question-container"></div>
+    <button id="add-question-btn" class="btn btn-success mt-4">
+      <i class="fas fa-plus-circle me-2"></i>
+      Ajouter une question
+    </button>
+  </main>
+          
+{% endblock %}
+
+

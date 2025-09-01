@@ -1,0 +1,198 @@
+{% extends "layout.html" %}
+
+{% block style %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='main_style.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='login_register.css') }}">
+  <style>
+    /* Style pour le tooltip d'information email */
+    .email-info-container {
+      position: relative;
+      display: inline-block;
+    }
+    
+    .email-info-icon {
+      position: absolute;
+      top: 50%;
+      right: 16px;
+      transform: translateY(-50%);
+      cursor: help;
+      color: #6c757d;
+      font-size: 16px;
+      z-index: 10;
+    }
+    
+    .email-info-icon:hover {
+      color: #495057;
+    }
+    
+    .email-tooltip {
+      position: absolute;
+      top: -45px;
+      right: 0;
+      background: #343a40;
+      color: white;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      white-space: nowrap;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      z-index: 1000;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    
+    .email-tooltip::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      right: 12px;
+      width: 0;
+      height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-top: 5px solid #343a40;
+    }
+    
+    .email-tooltip.show {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .email-tooltip {
+        right: -20px;
+        left: -20px;
+        text-align: center;
+        white-space: normal;
+        max-width: 250px;
+      }
+      
+      .email-tooltip::after {
+        right: 50%;
+        transform: translateX(50%);
+      }
+    }
+  </style>
+{% endblock %}
+
+{% block script %}
+  <script src="{{ url_for('static', filename='togglePassword.js') }}"></script>
+  <script>
+    // Script pour le tooltip d'information email
+    document.addEventListener('DOMContentLoaded', function() {
+      const emailIcon = document.querySelector('.email-info-icon');
+      const emailTooltip = document.querySelector('.email-tooltip');
+      let tooltipTimeout;
+      
+      if (emailIcon && emailTooltip) {
+        // Afficher le tooltip au clic
+        emailIcon.addEventListener('click', function(e) {
+          e.preventDefault();
+          clearTimeout(tooltipTimeout);
+          emailTooltip.classList.toggle('show');
+          
+          // Masquer automatiquement après 4 secondes
+          if (emailTooltip.classList.contains('show')) {
+            tooltipTimeout = setTimeout(() => {
+              emailTooltip.classList.remove('show');
+            }, 4000);
+          }
+        });
+        
+        // Masquer le tooltip si on clique ailleurs
+        document.addEventListener('click', function(e) {
+          if (!emailIcon.contains(e.target) && !emailTooltip.contains(e.target)) {
+            emailTooltip.classList.remove('show');
+            clearTimeout(tooltipTimeout);
+          }
+        });
+        
+        // Optionnel : Afficher au hover aussi
+        emailIcon.addEventListener('mouseenter', function() {
+          clearTimeout(tooltipTimeout);
+          emailTooltip.classList.add('show');
+        });
+        
+        emailIcon.addEventListener('mouseleave', function() {
+          tooltipTimeout = setTimeout(() => {
+            emailTooltip.classList.remove('show');
+          }, 1000);
+        });
+      }
+    });
+  </script>
+{% endblock %}
+
+{% block main %}
+  <main>
+    <div class="login-container text-center">
+      <div class="login-title">Inscription</div>
+      {% if special_error_feedback %}
+        <div class="alert alert-danger text-center" role="alert" style="margin-top: 10px; border: none">
+          {{ special_error_feedback }}
+        </div>
+      {% endif %}
+      <form action="{{ url_for('auth.register') }}" method="post">
+
+        <div class="mb-3">
+          {% if username %}
+            <input autocomplete="off" autofocus class="form-control" name="username" 
+            placeholder="Nom d'utilisateur" type="text" required value="{{ username }}">
+          {% else %}
+            <input autocomplete="off" autofocus class="form-control" name="username" 
+            placeholder="Nom d'utilisateur" type="text" required>
+          {% endif %}
+        </div>
+
+        <div class="mb-3" style="position: relative;">
+          <input class="form-control" name="password" placeholder="Mot de passe" 
+          type="password" required>
+          <span class="togglePassword" style="position: absolute; top: 50%; right: 16px; 
+          transform: translateY(-50%); cursor: pointer;">
+            <i class="fa fa-eye" style="color: #888"></i>
+          </span>
+        </div>
+
+        <div class="mb-3" style="position: relative;">
+          <input class="form-control" name="confirmation" placeholder="Confirmation mot de passe" 
+          type="password" required>
+          <span class="togglePassword" style="position: absolute; top: 50%; right: 16px; 
+          transform: translateY(-50%); cursor: pointer;">
+            <i class="fa fa-eye" style="color: #888"></i>
+          </span>
+        </div>
+
+        <!-- Champ email avec icône d'information -->
+        <div class="mb-3 email-info-container">
+          {% if email %}
+            <input autocomplete="off" class="form-control" name="email" 
+            placeholder="Email (optionnel)" type="email" value="{{ email }}" style="padding-right: 45px;">
+          {% else %}
+            <input autocomplete="off" class="form-control" name="email" 
+            placeholder="Email (optionnel)" type="email" style="padding-right: 45px;">
+          {% endif %}
+          
+          <!-- Icône d'information -->
+          <i class="fas fa-info-circle email-info-icon" title="Information sur l'email"></i>
+          
+          <!-- Tooltip informatif -->
+          <div class="email-tooltip">
+            Email optionnel pour la récupération du mot de passe en cas d'oubli.
+          </div>
+        </div>
+        
+        <button class="btn btn-primary w-100" type="submit">S'inscrire</button>
+        <a href="{{ url_for('auth.login') }}" class="btn btn-secondary w-100 mt-2" 
+        style="border: none;">
+          Déjà inscrit ? Se connecter
+        </a>
+      </form>
+    </div>
+  </main>
+{% endblock %}
+
+
+

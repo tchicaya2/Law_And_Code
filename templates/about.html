@@ -1,0 +1,110 @@
+{% extends "layout.html" %}
+
+{% block style %}
+<link rel="stylesheet" href="{{ url_for('static', filename='main_style.css') }}">
+{% endblock %}
+
+{% block script %}
+<script src="{{ url_for('static', filename='textMaxLenght.js') }}"></script>
+{% endblock %}
+
+{% block main %}
+<main class="container py-5" style="background-color: linear-gradient(180deg, 
+0% #ffffff, 20% #edf2fb, #cfdef3); border-radius: 15px;">
+    <div class="text-center mb-5" style="border: 1px solid #d1d5db; padding: 20px; 
+    border-radius: 15px;">
+        <img src="{{ url_for('static', filename='1750383440064.jpg') }}" 
+        class="rounded-circle img-fluid" style="width: 300px; height: 300px; object-fit: cover; 
+        border: linear-gradient(135deg, #edf2fb, #cfdef3); border-radius: 15px;" 
+        alt="Photo du créateur">
+    </div>
+
+    <section class="mb-5">
+        <div class="text-center">
+            <h2>À Propos</h2>
+            <hr class="w-25 mx-auto" style="color: linear-gradient(90deg, 
+            #ffffff, #edf2fb);">
+        </div>
+        <p class="text-muted text-justify">
+            Moi c'est Tchicaya Divin. J'étudie le droit et je m'intéresse beaucoup à la tech, 
+            tout particulièrement à la programmation, une compétence qui m'a toujours fasciné 
+            et que j'ai toujours souhaité acquérir. J'ai donc décidé de suivre les cours
+            <a href="https://cs50.harvard.edu/python/2022/">CS50 Python</a> et
+            <a href="https://www.edx.org/learn/computer-science/
+            harvard-university-cs50-s-introduction-to-computer-science">CS50x</a> proposés 
+            gratuitement par Harvard University.
+            J'ai ainsi pu apprendre à écrire des programmes dans plusieurs langages incluant 
+            Python, C, SQL, et à construire des interfaces avec HTML et CSS, tout en apprenant 
+            à lier les deux pour construire des projets relativement complets tel que
+            celui-ci. Ce site a donc été conçu pour mon projet final CS50x, pour lequel j'ai 
+            voulu créer une plateforme à la croisée du droit et du code.
+        </p>
+
+        <a class="btn btn-outline-secondary mt-4" href="{{ url_for('static', 
+        filename='CV Tchicaya.pdf') }}" target="blank">
+            <i class="bi bi-eye"></i> 
+            Mon CV
+        </a>
+    </section>
+
+    <section class="py-5 bg-light rounded">
+        <div class="container">
+            <div class="text-center mb-4">
+                <div class="bg-primary text-white rounded-circle p-3 d-inline-block mb-2" 
+                style="color: gray;">
+                    <i class="bi bi-envelope"></i>
+                </div>
+                <h1 class="fw-bold">
+                    Me contacter
+                </h1>
+                <p class="text-muted">
+                    Pour signaler un problème ou échanger !
+                </p>
+            </div>
+
+            <form action="{{ url_for('main.messages') }}" method="post">
+                <div class="mb-3">
+                    <label name ="name" class="form-label">Nom</label>
+                    <input class="form-control" id="name" name="name" type="text" 
+                    placeholder="Entrez votre nom..." required>
+                </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">Adresse mail</label>
+                    <input class="form-control" id="email" name="email" type="email" 
+                    placeholder="name@example.com">
+                </div>
+                <div class="mb-3">
+                    <label for="phone" class="form-label">Téléphone</label>
+                    <input class="form-control" id="phone" name="phone" type="tel" 
+                    placeholder="(123) 456-7890">
+                </div>
+                <div class="mb-3" style="position: relative;">
+                    <label for="msg" class="form-label">Message</label>
+                    <textarea class="form-control" id="msg" name="msg" rows="5" 
+                    placeholder="Entrez votre message" maxlength="500" required></textarea>
+                    <div class="char-count">0 / 500</div>
+                </div>
+                <div class="d-grid">
+                    <button class="btn btn-primary btn-lg" type="submit">Envoyer</button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <div class="d-flex justify-content-center gap-3 mt-5">
+        <a href="https://www.linkedin.com/in/divin-tchicaya-19950b255/">
+            <img src="https://img.icons8.com/?size=100&id=8808&format=png&color=000000" 
+            alt="LinkedIn" width="40">
+        </a>
+        <a href="#">
+            <img src="https://img.icons8.com/?size=100&id=62856&format=png&color=000000" 
+            alt="GitHub" width="40">
+        </a>
+        <a href="mailto:davetchicaya@gmail.com">
+            <img src="https://img.icons8.com/?size=100&id=12623&format=png&color=000000" 
+            alt="Email" width="40">
+        </a>
+    </div>
+
+</main>
+{% endblock %}

@@ -1,0 +1,202 @@
+{% extends "layout.html" %}
+
+{% block style %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='main_style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='profile.css') }}">
+{% endblock %}
+{% block script %}
+<script src="{{ url_for('static', filename='deleteAccount.js') }}"></script>
+{% endblock %}
+
+{% block title %}
+    Profil
+{% endblock %}
+
+{% block main %}
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg bg-body border-bottom sticky-top">
+  <div class="container">
+    <!-- En-tête -->
+    <header class="profile-cover py-4 w-100">
+        <div class="container d-flex flex-column align-items-center text-center gap-3">
+            <div class="avatar"><i class="bi bi-person"></i></div>
+            <div>
+                <h1 class="h3 mb-1">{{ session.get("username") }}</h1>
+                <p class="text-secondary mb-0">Membre depuis 2025</p>
+            </div>
+        </div>
+    </header>
+  </div>
+</nav>
+
+<main class="py-5">
+  <div class="container">
+    <!-- Mes résultats -->
+    <section id="resultats" class="section-anchor card mb-4 shadow-sm">
+      <div class="card-body p-4">
+        <h2 class="h5 mb-3"><i class="bi bi-bar-chart me-2"></i>Mes résultats</h2>
+
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-primary">
+                    {% if rows %}
+                        <tr>
+                            <th scope="col">Matière</th>
+                            <th scope="col">Questions Posées</th>
+                            <th scope="col">Réponses correctes</th>
+                            <th scope="col">Taux de réussite</th>
+                        </tr>
+                    {% endif %}
+                </thead>
+                <tbody>
+                    {% if rows %}
+                        {% for row in rows %}
+                        <tr>
+                            <td class="fw-bold">{{ row[0] }}</td>
+                            <td>{{ row[1] }}</td>
+                            <td>{{ row[2] }}</td>
+                            <td>
+                                {% if row[1] != 0 %}
+                                    <span class="badge bg-success"> {{ ((row[2] / row[1]) * 100) | round }}% </span>
+                                {% else %}
+                                    <span class="badge bg-secondary"> 0% </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        </tbody>
+            </table>
+        </div>
+        {% if not rows %}
+            <div class="alert alert-info text-center mt-3" role="alert">
+                <i class="bi bi-info-circle me-2"></i>
+                Rien à afficher ici pour l'instant. 
+                <a href="{{ url_for('quiz.choix') }}" class="alert-link">
+                    Jouez à un quiz
+                </a> 
+                pour commencer à voir vos résultats !
+            </div>
+        {% endif %}
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Mes Quizz -->
+    <a href="{{ url_for('quiz.choix', quiz_type='private') }}" class="text-decoration-none text-center">
+        <section id="quizz" class="section-anchor card mb-4 shadow-sm">
+        <div class="card-body p-4">
+            <h2 class="h5 mb-3"><i class="bi bi-ui-checks-grid me-2"></i>Mes Quizz</h2>
+            <p class="text-muted mb-0">Liste de vos quizz créés</p>
+        </div>
+        </section>
+    </a>
+
+    <!-- Ajouter/Gérer une adresse mail -->
+    <section id="ajout-email" class="section-anchor card mb-4 shadow-sm text-center">
+    <div class="card-body p-4">
+        {% if email %}
+        <!-- L'utilisateur a déjà un email -->
+        <h2 class="h5 mb-1">
+            <i class="bi bi-envelope-check me-2"></i>
+            Gérer mon adresse mail
+        </h2>
+        <h3 class="h6 mb-3">(Modifiez ou supprimez votre adresse email)</h3>
+        <form action="{{ url_for('auth.update_email') }}" method="post" class="row g-3">
+            <div class="col-12">
+                <label for="emailInput" class="form-label">Adresse email actuelle</label>
+                <input type="email" class="form-control" id="emailInput" name="email" 
+                        value="{{ email }}" placeholder="votre.email@exemple.com" required />
+                <input type="hidden" name="authentication_token" value="{{ authentication_token }}"/>
+            </div>
+            <div class="col-12">
+            <div class="d-flex justify-content-center gap-3">
+                <button type="submit" class="btn btn-primary">
+                <i class="bi bi-pencil me-2"></i>Modifier
+                </button>
+                <button type="button" class="btn btn-outline-danger" id="remove-email-btn">
+                <i class="bi bi-trash me-2"></i>Supprimer
+                </button>
+            </div>
+            </div>
+        </form>
+        
+        <!-- Formulaire caché pour supprimer l'email -->
+        <form id="remove-email-form" action="{{ url_for('auth.remove_email') }}" method="post" style="display: none;">
+            <input type="hidden" name="confirm_remove" value="true">
+            <input type="hidden" name="authentication_token" value="{{ authentication_token }}"/>
+        </form>
+        
+        {% else %}
+        <!-- L'utilisateur n'a pas d'email -->
+        <h2 class="h5 mb-1">
+            <i class="bi bi-envelope-plus me-2"></i>
+            Ajouter une adresse mail
+        </h2>
+        <h3 class="h6 mb-3">(Ceci peut être utile pour la récupération de votre mot de passe)</h3>
+        <form action="{{ url_for('auth.add_email') }}" method="post" class="row g-3">
+            <div class="col-12">
+                <label for="emailInput" class="form-label">Adresse email</label>
+                <input type="email" class="form-control" id="emailInput" name="email" 
+                        placeholder="votre.email@exemple.com" required />
+                <input type="hidden" name="authentication_token" value="{{ authentication_token }}"/>
+            </div>
+            <div class="col-12">
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-plus-circle me-2"></i>Ajouter
+            </button>
+            </div>
+        </form>
+        {% endif %}
+    </div>
+    </section>
+
+    <!-- Supprimer mon compte -->
+    <section id="supprimer" class="section-anchor card border-danger shadow-sm text-center">
+      <div class="card-body p-4">
+        <h2 class="h5 text-danger mb-3"><i class="bi bi-exclamation-triangle me-2"></i>Supprimer mon compte</h2>
+        <p class="text-muted mb-3">Cette action est irréversible.</p>
+        <a id="delete_account" href="{{ url_for('auth.delete_account') }}" class="btn btn-danger">
+            <i class="bi bi-trash me-2"></i>Supprimer
+        </a>
+      </div>
+    </section>
+  </div>
+    <div id="confirm_deletion" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; 
+    background: rgba(30, 41, 59, 0.45); display: flex; justify-content: center; 
+    align-items: center; z-index: 9999;" hidden>
+        <div style="background: linear-gradient(135deg, #e6ecf7 60%, #bfc6d3 100%); 
+        border-radius: 20px; box-shadow: 0 8px 32px rgba(30,41,59,0.18); 
+        padding: 44px 36px 36px 36px; min-width: 340px; max-width: 90vw; text-align: center; 
+        border: 1px solid #bfc6d3; position: relative;">
+            <h3 style="margin-top: 0; color: #dc3545; font-weight: 700; font-size: 1.35em;">
+                Voulez-vous vraiment supprimer votre compte ?
+            </h3>
+            <p style="color: #6c757d; margin-bottom: 32px; font-size: 1.08em;">
+                Cette action est <b>irréversible</b>.
+            </p>
+            <div style="display: flex; justify-content: center; gap: 24px;">
+                <a class="endbuttons" id="deletion_confirmed" 
+                style="background: linear-gradient(90deg, #dc3545, #f64f43 125%); 
+                color: #fff; padding: 12px 34px; border-radius: 10px; font-weight: 600; 
+                text-decoration: none; box-shadow: 0 2px 8px rgba(220,53,69,0.10); 
+                font-size: 1.08em; border: none; transition: background 0.2s, box-shadow 0.2s;">
+                    Supprimer
+                </a>
+                <a class="endbuttons" id="deletion_cancelled" 
+                style="background: #e6ecf7; color: #333; padding: 12px 34px; 
+                border-radius: 10px; font-weight: 600; text-decoration: none; 
+                border: 1px solid #bfc6d3; font-size: 1.08em; 
+                transition: background 0.2s, border 0.2s;">
+                    Annuler
+                </a>
+            </div>
+        </div>
+    </div>
+</main>
+
+{% endblock %}

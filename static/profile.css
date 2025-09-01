@@ -1,0 +1,166 @@
+body {
+    background: linear-gradient(135deg, #e0e7ef 0%, #b3c6e6 100%);
+    font-family: 'Segoe UI', Arial, sans-serif;
+}
+.section {
+    background: linear-gradient(120deg, #f8fafc 60%, #e3eaf7 100%);
+    border-radius: 18px;
+    box-shadow: 0 6px 24px rgba(44, 62, 80, 0.10);
+    padding: 40px 32px;
+    max-width: 800px;
+    margin: 5% auto;
+    border: 1px solid #d1d5db;
+}
+h2 {
+    color: #2563eb;
+    text-align: center;
+    margin-bottom: 16px; /* Espace réduit */
+    letter-spacing: 1px;
+    font-family: 'Segoe UI', sans-serif;
+}
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(44, 62, 80, 0.07);
+}
+th, td {
+    padding: 16px 12px; 
+    text-align: center;
+}
+th {
+    background: linear-gradient(90deg, #2563eb 60%, #64748b 100%);
+    color: #fff;
+    font-weight: 600;
+    border-bottom: 2px solid #e0e7ef;
+}
+tr:nth-child(even) td {
+    background: #f1f5f9;
+}
+tr:hover td {
+    background: #e0e7ef;
+}
+/* Styles pour la page de profil */
+.profile-cover {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #cbd5e1 100%);
+    color: #334155;
+    border-bottom: 1px solid #e2e8f0;
+    border-radius: 20px;
+}
+
+.avatar {
+    width: 80px;
+    height: 80px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    border: 3px solid rgba(148, 163, 184, 0.3);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.avatar i {
+    color: #64748b;
+}
+
+/* Amélioration du titre dans le header */
+.profile-cover h1 {
+    color: #1e293b;
+    font-weight: 600;
+}
+
+.profile-cover .text-secondary {
+    color: #64748b !important;
+}
+
+/* Amélioration des cartes */
+.card {
+    border: none;
+    border-radius: 12px;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Table responsive améliorée - CORRECTION OVERFLOW SEULEMENT */
+.table-responsive {
+    border-radius: 8px;
+    overflow-x: auto; /* Scroll horizontal quand nécessaire */
+    overflow-y: visible; /* Pas de scroll vertical */
+    max-width: 100%; /* Respecte la largeur du container parent */
+    -webkit-overflow-scrolling: touch; /* Scroll fluide sur mobile */
+}
+
+.table th {
+    border: none;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    /* Suppression du white-space: nowrap pour garder les dimensions normales */
+}
+
+.table td {
+    border-color: #e9ecef;
+    vertical-align: middle;
+    /* Suppression du white-space: nowrap pour garder les dimensions normales */
+}
+
+/* Badges pour les pourcentages */
+.badge {
+    font-size: 0.875rem;
+    padding: 0.5em 0.75em;
+}
+
+/* Amélioration des alertes */
+.alert {
+    border: none;
+    border-radius: 10px;
+}
+
+.alert-info {
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+    color: #0d47a1;
+}
+
+/* Boutons avec icônes */
+.btn i {
+    font-size: 0.9rem;
+}
+
+/* Espacement harmonieux */
+main {
+    min-height: 70vh;
+}
+
+.container {
+    max-width: 900px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .avatar {
+        width: 60px;
+        height: 60px;
+        font-size: 2rem;
+    }
+    
+    .card-body {
+        padding: 1.5rem !important;
+    }
+    
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+    
+    /* Seulement sur mobile, on peut forcer une largeur minimum si le contenu est trop serré */
+    .table-responsive .table {
+        min-width: 500px; /* Juste assez pour que ce soit lisible sur mobile */
+    }
+}

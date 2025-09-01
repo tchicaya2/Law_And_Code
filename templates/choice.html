@@ -1,0 +1,140 @@
+{% extends "layout.html" %}
+
+{% block style %}
+
+<link rel="stylesheet" href="{{ url_for('static', filename='main_style.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='quizCards.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='search_bar.css') }}">
+{% endblock %}
+
+{% block title %}
+  Choix de quiz
+{% endblock %}
+
+{% block script %}
+<script src="{{ url_for('static', filename='lockedQuiz.js') }}"></script>
+{% endblock %}
+
+{% block main %}
+  <main class="jurisquiz_main">
+      <div id="locked-quiz-message" class="alert alert-info text-center" 
+      role="alert" style="margin-top: 10px; font-size: 1rem; display: none;
+      position: fixed; top: 0px; z-index: 1000;">
+        Ce quiz ne peut pas être lancé car il contient moins de 4 questions.
+      </div>
+    <div id="pagetype" hidden>{{type}}</div>
+
+    {% if type == "public" %}
+      <h3 class="fw-bold" style="padding-top: 40px;">Choisissez un quiz</h3>
+    {% else %}
+      <h3 class="fw-bold" style="padding-top: 40px;">Choisissez un dossier</h3>
+    {% endif %}
+      <form action="{{ url_for('quiz.choix') }}" method="post" class="search-bar mt-2">
+        <input type="text" name="query" placeholder="Rechercher un quiz..." 
+        maxlength="100" value="{{ query }}" autocomplete="off" required>
+        <input type="hidden" name="quiz_type" value="{{ type }}">
+        <button type="submit" aria-label="Rechercher">
+          <i class="fa fa-search"></i>
+        </button>
+      </form>
+      <span>{{ result_feedback }}</span>
+    {% if type == "private" and not response %} <!-- Je renvoie une variable response pour vérifier
+     si l'utilisateur a des quiz disponibles
+    uniquement lorsque l'utilisateur veut jouer à un quiz privé. 
+    Je n'utilise pas cela pour les quiz publics car il y a toujours des quiz de dispos là-bas-->
+      <div class="container text-center py-5 choice_container">
+        <div class="alert alert-info text-center" role="alert" style="font-size: 1.1rem;">
+          Vous n'avez pas encore créé de quiz. Vous pouvez en créer un 
+          <a href="{{ url_for('quiz.choose_file') }}">ici</a> !
+        </div>
+      </div>
+    {% elif type == "public" and not response %}
+      <div class="container text-center py-5 choice_container">
+        <div class="alert alert-info text-center" role="alert" style="font-size: 1.1rem;">
+          Aucun quiz n'a été trouvé pour cette requête.
+        </div>
+      </div>
+    {% elif response %}
+    <div class="container text-center py-2 mt-2 choice_container">
+      {% if type == "public"%}
+        {% for choice in response %}
+          <a href="{{ url_for('quiz.quiz', type=type, titre=choice.titre, 
+          matiere=choice.matiere, auteur=choice.user_id) }}" 
+          class="quiz-card {% if loop.index is even %}dark{% else %}light{% endif %}">
+            <div class="quiz-content">
+              <div class="quiz-title">{{ choice.titre }}</div>
+              <div class="quiz-meta">
+                👤 par <strong>{{ choice.user_id }}</strong> •
+                🏷️ Matière : <strong>{{ choice.matiere }}</strong> •
+                🎓 Niveau : <strong>{{ choice.niveau }}</strong> •
+                ❓ <strong>{{ choice.nombre_de_questions }} questions</strong>
+              </div>
+            </div>
+            <div class="quiz-likes">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 
+                        2 5.42 4.42 3 7.5 3c1.74 0 3.41 0.81 
+                        4.5 2.09C13.09 3.81 14.76 3 
+                        16.5 3 19.58 3 22 5.42 22 8.5c0 
+                        3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+              </svg>
+              {{ choice.likes }}
+            </div>
+          </a>
+        {% endfor %}
+      {% endif %}
+      {% if type == "private" %}
+        {% for choice in response %}
+          <a href="{{ url_for('quiz.quiz', type=type, titre=choice.titre, quiz_id=choice.quiz_id) }}">
+            <label id="dossier" class="réponse" style="font-size: 1.2em;" for="1" data-count="{{ choice.nombre_de_questions }}">
+              {{ choice.titre }}
+              {% if choice.nombre_de_questions < 4 %}
+                <i class="fa fa-lock"></i>
+              {% endif %}
+            </label>
+          </a>
+        {% endfor %}
+      {% endif %}
+    </div>
+    {% endif %}
+    {% if total_pages > 1 %}
+      <nav class="pagination-nav" aria-label="Pagination" style="margin: 32px auto 0 auto; display: flex; justify-content: center; gap: 8px;">
+        {% if page > 1 %}
+          <form method="{% if query %}post{% else %}get{% endif %}" action="{{ url_for('quiz.choix') }}">
+            <input type="hidden" name="query" value="{{ query }}">
+            <input type="hidden" name="page" value="1">
+            <input type="hidden" name="quiz_type" value="{{ type }}">
+            <button type="submit" class="btn btn-light" title="Première page">&laquo;</button>
+          </form>
+          <form method="{% if query %}post{% else %}get{% endif %}" action="{{ url_for('quiz.choix') }}">
+            <input type="hidden" name="query" value="{{ query }}">
+            <input type="hidden" name="page" value="{{ page - 1 }}">
+            <input type="hidden" name="quiz_type" value="{{ type }}">
+            <button type="submit" class="btn btn-light" title="Page précédente">&lt;</button>
+          </form>
+        {% endif %}
+        <span style="align-self: center; font-weight: 500;">
+          Page {{ page }} / {{ total_pages }}
+        </span>
+        {% if page < total_pages %}
+          <form method="{% if query %}post{% else %}get{% endif %}" action="{{ url_for('quiz.choix') }}">
+            <input type="hidden" name="query" value="{{ query }}">
+            <input type="hidden" name="page" value="{{ page + 1 }}">
+            <input type="hidden" name="quiz_type" value="{{ type }}">
+            <button type="submit" class="btn btn-light" title="Page suivante">&gt;</button>
+          </form>
+          <form method="{% if query %}post{% else %}get{% endif %}" action="{{ url_for('quiz.choix') }}">
+            <input type="hidden" name="query" value="{{ query }}">
+            <input type="hidden" name="page" value="{{ total_pages }}">
+            <input type="hidden" name="quiz_type" value="{{ type }}">
+            <button type="submit" class="btn btn-light" title="Dernière page">&raquo;</button>
+          </form>
+        {% endif %}
+      </nav>
+    {% endif %}
+
+</main>
+
+{% endblock %}
+
