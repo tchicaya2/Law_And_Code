@@ -178,4 +178,4 @@ CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "4", "app:app"]
 */5 * * * * /path/to/app/.venv/bin/python /path/to/app/monitoring_dashboard.py --url https://yourapp.com
 ```
 
-Le système de monitoring est maintenant **prêt pour la production** avec logging structuré, métriques automatiques, health checks et alerting intelligent ! 🚀
+Système de monitoring prêt pour la production avec logging structuré, métriques automatiques, health checks et alerting intelligent.
