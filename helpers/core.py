@@ -114,13 +114,6 @@ def apology(message, code=400):
 
     return render_template("apology.html", top=code, bottom=escape(message)), code
 
-def get_connection():
-    database_url = os.environ.get('DATABASE_URL')
-    if not database_url:
-        raise Exception("DATABASE_URL environment variable is not set")
-    
-    return psycopg2.connect(database_url)
-
 def arg_is_present(args):
     # Regarde les éléments contenus dans une liste et si un élément est None, retourner False
     for arg in args:
