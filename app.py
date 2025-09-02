@@ -10,6 +10,7 @@ import os
 # Import du système de monitoring
 from helpers.monitoring import setup_logging, setup_error_handling, setup_request_monitoring, health_check, log_user_action
 from helpers.sentry_simple import init_sentry
+from helpers.core import initialize_db_pool
 
 print("=== DÉMARRAGE DE L'APPLICATION ===")
 print(f"DATABASE_URL is {'set' if os.environ.get('DATABASE_URL') else 'NOT SET'}")
@@ -63,6 +64,13 @@ mail = Mail(app)
 
 # Make mail available to blueprints
 app.mail = mail
+
+# Initialiser le pool de connexions base de données
+try:
+    initialize_db_pool()
+    app_logger.info("Pool de connexions base de données initialisé")
+except Exception as e:
+    app_logger.error(f"Erreur lors de l'initialisation du pool DB: {e}", exc_info=True)
 
 # Configurer le monitoring des erreurs et requêtes
 setup_error_handling(app)

@@ -1,6 +1,7 @@
 from flask import redirect, request, render_template, session, url_for
 from functools import wraps
 import psycopg2
+from psycopg2 import pool
 import os
 from itsdangerous import URLSafeTimedSerializer
 from flask_mail import Message
@@ -11,6 +12,49 @@ import logging
 
 # Logger pour ce module
 logger = logging.getLogger('law_quiz_app.helpers')
+
+# Connection pool global
+_connection_pool = None
+
+def initialize_db_pool():
+    """Initialize the database connection pool"""
+    global _connection_pool
+    if _connection_pool is None:
+        database_url = os.environ.get('DATABASE_URL')
+        if not database_url:
+            raise Exception("DATABASE_URL environment variable is not set")
+        
+        try:
+            _connection_pool = psycopg2.pool.ThreadedConnectionPool(
+                minconn=2,  # Minimum 2 connections
+                maxconn=10, # Maximum 10 connections  
+                dsn=database_url
+            )
+            logger.info("Database connection pool initialized successfully", extra={
+                'min_connections': 2,
+                'max_connections': 10
+            })
+        except Exception as e:
+            logger.error(f"Failed to initialize connection pool: {e}", exc_info=True)
+            raise
+
+def get_connection():
+    """Get a connection from the pool"""
+    global _connection_pool
+    if _connection_pool is None:
+        initialize_db_pool()
+    
+    try:
+        return _connection_pool.getconn()
+    except Exception as e:
+        logger.error(f"Failed to get connection from pool: {e}", exc_info=True)
+        raise
+
+def return_connection(conn):
+    """Return a connection to the pool"""
+    global _connection_pool
+    if _connection_pool and conn:
+        _connection_pool.putconn(conn)
 
 """  FONCTIONS UTILITAIRES  """
 
@@ -86,7 +130,7 @@ def arg_is_present(args):
 
 def db_request(text, params=None, fetch=True):
     """
-    Execute a database request.
+    Execute a database request using connection pool.
 
     Args:
         text (str): SQL query to execute.
@@ -97,8 +141,9 @@ def db_request(text, params=None, fetch=True):
     Returns:
         list or None: Query results if fetch is True, otherwise None.
     """
-    conn = get_connection()
+    conn = None
     try:
+        conn = get_connection()
         cursor = conn.cursor()
         if params is None:
             params = ()
@@ -110,6 +155,8 @@ def db_request(text, params=None, fetch=True):
         conn.commit()
         return rows
     except Exception as e:
+        if conn:
+            conn.rollback()
         logger.error(f"Erreur base de données: {e}", extra={
             'query': text[:100],  # Première partie de la requête
             'params_count': len(params) if params else 0,
@@ -117,7 +164,8 @@ def db_request(text, params=None, fetch=True):
         }, exc_info=True)
         return apology("Une erreur s'est produite lors de la requête à la base de données.")
     finally:
-        conn.close()
+        if conn:
+            return_connection(conn)
 
 def generate_reset_token():
     """Génère un token sécurisé pour la réinitialisation de mot de passe"""
