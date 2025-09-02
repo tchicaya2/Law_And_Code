@@ -262,9 +262,11 @@ def choose_file():
     
     # Au cas où il y aurait un message à afficher
     message = request.args.get("message") if request.args.get("message") else None
+    error_msg = request.args.get("error_msg") if request.args.get("error_msg") else None
     error = request.args.get("error") if request.args.get("error") else None
 
-    return render_template("choosefile.html", dossiers=results, message=message, 
+
+    return render_template("choosefile.html", dossiers=results, message=message, error_msg=error_msg, 
                            matieres=matieres, niveaux=niveaux, error=error)
 
 
@@ -286,9 +288,9 @@ def create_new_quiz_file():
     # Vérifier si un dossier avec le même nom existe déjà pour l'utilisateur
     if db_request("SELECT * FROM quiz_infos WHERE user_id = %s AND titre = %s",
                    (session.get("user_id"), nom_de_dossier), fetch=True):
-        message = "Un dossier avec ce nom existe déjà"
+        error_msg = "Un dossier avec ce nom existe déjà"
         # Redirige vers la page de choix de fichier si le dossier existe déjà
-        return redirect(url_for('quiz.choose_file', message=message, error=True))
+        return redirect(url_for('quiz.choose_file', error_msg=error_msg, error=True))
     if matiere.lower() not in [m.lower() for m in matieres]:
         print("MATIERE", matiere)
         message = "Matière invalide. Veuillez choisir une matière valide"
