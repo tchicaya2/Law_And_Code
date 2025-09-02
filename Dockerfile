@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y \
 
 # Copier et installer les requirements
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --root-user-action=ignore -r requirements.txt
 
 # Copier le code de l'application
 COPY . .

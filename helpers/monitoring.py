@@ -314,13 +314,8 @@ def health_check():
         status['status'] = 'degraded'
     
     try:
-        # Test du cache Redis
-        from app import redis_client
-        if redis_client:
-            redis_client.ping()
-            status['cache'] = 'healthy'
-        else:
-            status['cache'] = 'memory_fallback'
+        # Plus de Redis - cache désactivé
+        status['cache'] = 'disabled'
     except Exception as e:
         status['cache'] = 'unhealthy'
         status['cache_error'] = str(e)
