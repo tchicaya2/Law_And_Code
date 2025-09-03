@@ -84,7 +84,11 @@ def login_required(f):
 def capitalize_first_letter(text):
     if not text:
         return text
-    return text[0].upper() + text[1:]
+    try: 
+        int(text[0])
+        return text
+    except (ValueError, TypeError):
+        return text[0].upper() + text[1:]
 
 def clean_arg(arg):
     return capitalize_first_letter(arg).strip() if arg else None

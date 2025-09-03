@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, session, redirect, url_for, flash, current_app
 from werkzeug.security import check_password_hash, generate_password_hash
-from helpers import login_required, apology, db_request, arg_is_present, generate_reset_token, send_reset_email, is_valid_email, log_user_action, log_security_event
+from helpers import login_required, apology, db_request, arg_is_present, generate_reset_token, send_reset_email, is_valid_email, log_user_action, log_security_event, capitalize_first_letter
 from helpers.sentry_simple import capture_user_context, capture_custom_event
 import re
 from urllib.parse import urlparse
@@ -150,7 +150,7 @@ def register():
         return render_template("register.html")
     
     elif request.method == "POST":  # Soumission d'informations d'inscription
-        username = request.form.get("username")
+        username = capitalize_first_letter(request.form.get("username").strip()) if request.form.get("username") else None
         password = request.form.get("password")
         confirmation = request.form.get("confirmation")
         email = request.form.get("email", "").strip()  # Récupère l'email, vide par défaut

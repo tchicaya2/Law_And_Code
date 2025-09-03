@@ -36,7 +36,9 @@ def choix():
                 ORDER BY qi.likes DESC
                 LIMIT 10 OFFSET %s
             """, (offset,))
-            total_pages = db_request("SELECT COUNT(*) FROM quiz_infos WHERE type = 'public'", fetch=True)[0][0]
+            total_results = len(db_request("""SELECT qq.quiz_id FROM quiz_questions qq LEFT JOIN quiz_infos qi
+            ON qq.quiz_id = qi.quiz_id WHERE type = 'public' GROUP BY qq.quiz_id HAVING COUNT(*) > 3;""", fetch=True))
+            print("TOTAL PAGES:", total_results)
         else:
             user_id = session.get("user_id")
             rows = db_request("""
@@ -48,12 +50,12 @@ def choix():
                 GROUP BY qi.titre, qi.quiz_id
                 LIMIT 10 OFFSET %s
             """, (user_id, offset))
-            total_pages = db_request(
+            total_results = db_request(
             """SELECT COUNT(*) FROM quiz_infos
             WHERE user_id = %s""",
             (user_id,), fetch=True)[0][0]
         
-        total_pages = (total_pages + 9) // 10
+        total_pages = (total_results + 9) // 10
         # Extrait les données de chaque tuple selon le type de quiz (moins de données si quiz privés)
         dossiers = [{"titre": row[0], "user_id": row[1], "matiere": row[2], 
                     "niveau": row[3], "nombre_de_questions": row[4], 

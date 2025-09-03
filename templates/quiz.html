@@ -44,7 +44,7 @@
         <h3>Ton score : <span id="final_score"></span></h3>
       </div>
       <div class="restart">
-        {% if type == "public" %}
+        {% if type == "public" and session.get("user_id") %}
           {% if already_liked %}
             <button id="like-button" class="endbuttons" disabled 
             style="background-color: lightcoral;font-size:1.2em;">

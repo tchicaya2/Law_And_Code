@@ -1,8 +1,8 @@
 // Il y avait plus de 20 variables définies en global, j'ai revu le code pour les passer en local 
 // et entre fonctions
 let quizType;
-let counter = 0; // Utilisé à 5 autres endroits
-let chances = 3; // 10 autres endroits
+let counter = 0; // Utilisé à 5 autres endroits, donc mis en variable globale
+let chances; // 10 autres endroits
 let fin;
 let bonne_réponse;
 let titre;
@@ -222,7 +222,7 @@ function poser_question(pcp, r1, r2, r3, r4, score, essais, feedback,
     let principe = qa.principe; 
     options = qa.options;
 
-    chances = 3; // L'utilisateur a trois essais pour cliquer sur la bonne réponse
+    chances = 1; // L'utilisateur a trois essais pour cliquer sur la bonne réponse
     // On affiche les données dans les éléments HTML appropriés
     essais.textContent = chances;
     pcp.textContent = principe;
