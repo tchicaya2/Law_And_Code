@@ -146,6 +146,8 @@ def get_public_questions():
 def get_private_questions():
 
     quiz_id = request.args.get("quiz_id")
+    if not arg_is_present([quiz_id]):
+        return apology("titre manquant")
 
     rows = db_request("""SELECT réponse, question FROM quiz_questions
                       WHERE quiz_id = %s""",
@@ -195,10 +197,17 @@ def quiz():
             already_liked = True
         return render_template("quiz.html", type=type, titre=titre, matiere=matiere,
                             already_liked=already_liked, author_id=author_id, quiz_id=quiz_id)
+                            
     elif type == "private":
         if not arg_is_present([titre, type]):
             return apology("Titre ou type de quiz manquant")
-        quiz_id = request.args.get("quiz_id")
+
+        quiz_id = db_request("SELECT quiz_id FROM quiz_infos WHERE titre = %s AND user_id = %s",
+                            (titre, auteur), fetch=True)
+        if not quiz_id:
+            return apology("Quiz introuvable")
+        quiz_id = quiz_id[0][0]
+
         return render_template("quiz.html", type=type, titre=titre, matiere=matiere, quiz_id=quiz_id,
                             already_liked=True)
     else:
