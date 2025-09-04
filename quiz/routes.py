@@ -38,7 +38,7 @@ def choix():
             """, (offset,))
             total_results = len(db_request("""SELECT qq.quiz_id FROM quiz_questions qq LEFT JOIN quiz_infos qi
             ON qq.quiz_id = qi.quiz_id WHERE type = 'public' GROUP BY qq.quiz_id HAVING COUNT(*) > 3;""", fetch=True))
-            print("TOTAL PAGES:", total_results)
+
         else:
             user_id = session.get("user_id")
             rows = db_request("""

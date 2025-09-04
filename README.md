@@ -3,9 +3,9 @@
 [![Python](https://img.shields.io/badge/Python-3.13-blue.svg)](https://python.org)
 [![Flask](https://img.shields.io/badge/Flask-3.0-green.svg)](https://flask.palletsprojects.com)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue.svg)](https://postgresql.org)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-> 🎯 **Plateforme gamifiée d'apprentissage du droit** - Fusionnant technologie moderne et éducation juridique pour révolutionner l'apprentissage des principes légaux.
+
+> 🎯 **Plateforme gamifiée d'apprentissage du droit** - Fusionnant technologie moderne et éducation juridique.
 
 ## 📋 Table des Matières
 - [Vue d'ensemble](#-vue-densemble)
@@ -25,7 +25,6 @@
 ### 🔥 Objectifs du Projet
 - **Innovation pédagogique** : Moderniser l'apprentissage du droit par la technologie
 - **Accessibilité** : Rendre les quiz juridiques accessibles à tous
-- **Gamification** : Encourager l'engagement par des mécaniques de jeu
 - **Community-driven** : Permettre aux utilisateurs de créer et partager du contenu
 
 ## ✨ Fonctionnalités
@@ -40,13 +39,11 @@
 - **Création personnalisée** : Outils intuitifs pour créer ses propres quiz
 - **Gestion de contenu** : Modification, suppression, organisation
 - **Contrôle d'accès** : Public/Privé configurable
-- **Statistiques détaillées** : Suivi des performances
 
 ### 👤 Système Utilisateur
-- **Authentification sécurisée** : Sessions Flask + hashage bcrypt
-- **Profils personnalisés** : Historique et statistiques
-- **Système de notifications** : Email via SendGrid
-- **Administration** : Panel admin pour la modération
+- **Authentification sécurisée** : Sessions Flask + hashage des mots de passe
+- **Profils personnalisés** : Statistiques, liste des quiz, ajout/modification/supression email, suppression de compte 
+- **Récupération mot de passe** : email avec token sécurisé via SendGrid
 
 ### 📊 Monitoring & Analytics
 - **Logging structuré** : JSON logs pour analyse
@@ -123,7 +120,7 @@ SECRET_KEY=ton-secret-key-ultra-securise
 MAIL_SERVER=smtp.sendgrid.net
 MAIL_USERNAME=apikey
 MAIL_PASSWORD=ton-api-key-sendgrid
-MAIL_DEFAULT_SENDER=contact@lawandcode.com
+MAIL_DEFAULT_SENDER=une-adresse-mail-expéditeur
 
 # Monitoring (optionnel)
 SENTRY_DSN=https://ton-dsn@sentry.io/projet
@@ -170,37 +167,104 @@ docker run -p 5000:5000 --env-file .env lawandcode
 
 ```
 law-and-code/
-├── app.py                 # Point d'entrée principal
-├── requirements.txt       # Dépendances Python
-├── Procfile              # Configuration Heroku/Render
-├── runtime.txt           # Version Python
+├── app.py                    # Point d'entrée principal Flask
+├── requirements.txt          # Dépendances Python
+├── Procfile                  # Configuration Render/Heroku
+├── runtime.txt              # Version Python pour déploiement
+├── docker-compose.yml       # Configuration Docker développement
+├── Dockerfile               # Image Docker pour production
+├── .dockerignore           # Exclusions Docker
+├── .gitignore              # Exclusions Git
+├── .env                    # Variables d'environnement (local)
+├── monitoring_dashboard.py  # Dashboard de monitoring
+├── demo_sentry.py          # Démonstration Sentry
+├── run_tests.sh            # Script d'exécution des tests
 │
-├── helpers/              # Modules utilitaires
-│   ├── __init__.py      # Exports principaux
-│   ├── core.py          # Fonctions core (DB, auth)
-│   ├── monitoring.py    # Système de monitoring
-│   └── sentry_simple.py # Configuration Sentry
+├── helpers/                # Modules utilitaires
+│   ├── __init__.py        # Exports principaux
+│   ├── core.py            # Fonctions core (DB, auth, email)
+│   ├── monitoring.py      # Système de monitoring & logging
+│   ├── sentry_simple.py   # Configuration Sentry
+│   └── sentry_config.py   # Configuration Sentry avancée
 │
-├── templates/           # Templates Jinja2
-│   ├── layout.html     # Template de base
-│   ├── index.html      # Page d'accueil
-│   ├── choice.html     # Sélection de quiz
-│   ├── quiz.html       # Interface de jeu
-│   └── profile.html    # Profil utilisateur
+├── templates/             # Templates Jinja2
+│   ├── layout.html       # Template de base
+│   ├── index.html        # Page d'accueil
+│   ├── about.html        # Page à propos
+│   ├── choice.html       # Sélection de quiz
+│   ├── choosefile.html   # Sélection de fichier quiz
+│   ├── quiz.html         # Interface de jeu
+│   ├── profile.html      # Profil utilisateur
+│   ├── login.html        # Connexion
+│   ├── register.html     # Inscription
+│   ├── forgot_password.html    # Mot de passe oublié
+│   ├── reset_password.html     # Réinitialisation mot de passe
+│   ├── modify_questions.html   # Modification des questions
+│   ├── messages.html     # Messages/Contact
+│   └── apology.html      # Page d'erreur
 │
-├── static/             # Assets statiques
-│   ├── main_style.css # Styles principaux
-│   ├── quizlogic.js   # Logique des quiz
-│   └── img/           # Images et assets
+├── static/               # Assets statiques
+│   ├── CSS/
+│   │   ├── main_style.css        # Styles principaux
+│   │   ├── login_register.css    # Styles auth
+│   │   ├── profile.css           # Styles profil
+│   │   ├── quiz_page.css         # Styles quiz
+│   │   ├── quizCards.css         # Styles cartes quiz
+│   │   ├── search_bar.css        # Styles barre recherche
+│   │   └── view_messages.css     # Styles messages
+│   ├── JavaScript/
+│   │   ├── quizlogic.js          # Logique des quiz
+│   │   ├── deleteAccount.js      # Confirmation suppression compte
+│   │   ├── lockedQuiz.js         # Feedback quiz verrouillés
+│   │   ├── manageFile.js         # Gestion fichiers quiz
+│   │   ├── manageQuestion.js     # Gestion questions quiz
+│   │   ├── questionsRoute.js     # Routing questions
+│   │   ├── removeFlashMsg.js     # Suppression messages flash
+│   │   ├── textMaxLenght.js      # Limitation longueur texte
+│   │   └── togglePassword.js     # Affichage/masquage mot de passe
+│   ├── Images/
+│   │   └── 1750383440064.jpg     # Photo profil
+│   └── Documents/
+│       └── CV Tchicaya.pdf       # CV téléchargeable
 │
-├── admin/              # Module administration
-├── auth/               # Module authentification
-├── main/               # Routes principales
-├── quiz/               # Module quiz
+├── admin/                # Module administration
+│   ├── __init__.py      # Package admin
+│   └── routes.py        # Routes admin
 │
-├── tests.py           # Suite de tests
-├── pytest.ini        # Configuration tests
-└── logs/              # Logs applicatifs
+├── auth/                 # Module authentification
+│   ├── __init__.py      # Package auth
+│   └── routes.py        # Routes auth (login, register, reset)
+│
+├── main/                 # Routes principales
+│   ├── __init__.py      # Package main
+│   └── routes.py        # Routes principales (accueil, profil, messages)
+│
+├── quiz/                 # Module quiz
+│   ├── __init__.py      # Package quiz
+│   └── routes.py        # Routes quiz (création, jeu, gestion)
+│
+├── tests/               # Suite de tests
+│   ├── __init__.py      # Package tests
+│   ├── conftest.py      # Configuration pytest
+│   ├── test_auth.py     # Tests authentification
+│   ├── test_helpers.py  # Tests fonctions utilitaires
+│   ├── test_integration.py # Tests d'intégration
+│   ├── test_main.py     # Tests routes principales
+│   └── test_quiz.py     # Tests module quiz
+│
+├── logs/                # Logs applicatifs
+│   ├── app.log          # Logs généraux
+│   └── errors.log       # Logs d'erreurs
+│
+├── flask_session/       # Sessions Flask (filesystem)
+│
+├── Documentation/       # Documentation projet
+│   ├── MONITORING_GUIDE.md     # Guide monitoring
+│   ├── SENTRY_INTEGRATION.md   # Guide Sentry
+│   ├── TESTING_GUIDE.md        # Guide tests
+│   └── TESTS_SUMMARY.md        # Résumé des tests
+│
+└── pytest.ini          # Configuration pytest
 ```
 
 ### Base de Données
@@ -210,7 +274,7 @@ law-and-code/
 quiz_infos      -- Métadonnées des quiz
 quiz_questions  -- Questions et réponses
 users          -- Comptes utilisateurs
-quiz_likes     -- Système de likes
+quiz_likes     -- Tracking des likes
 user_stats     -- Statistiques utilisateur
 ```
 
@@ -268,45 +332,13 @@ ptw tests.py
 4. **Push** sur la branche (`git push origin feature/AmazingFeature`)
 5. **Ouvrir** une Pull Request
 
-### Standards de Code
-- **PEP 8** pour Python
-- **JSDoc** pour JavaScript
-- **Tests obligatoires** pour nouvelles features
-- **Logs structurés** pour toute nouvelle fonctionnalité
-
-## 📈 Roadmap
-
-### Version 2.0
-- [ ] **API REST** complète
-- [ ] **Mobile app** React Native
-- [ ] **AI-powered** suggestions de questions
-- [ ] **Collaborative features** équipes/classes
-
-### Version 1.1
-- [ ] **Export PDF** des résultats
-- [ ] **Thèmes sombres/clairs**
-- [ ] **Notifications push**
-- [ ] **Statistiques avancées**
-
-## 📄 Licence
-
-Ce projet est sous licence MIT. Voir le fichier [LICENSE](LICENSE) pour plus de détails.
-
-## 🙏 Remerciements
-
-- **CS50x** - Cours qui a initié ce projet
-- **Flask Community** - Documentation exceptionnelle
-- **PostgreSQL Team** - Base de données robuste
-- **Bootstrap Team** - Framework CSS moderne
-
 ---
 
 <div align="center">
-  <p><strong>Développé avec ❤️ pour démocratiser l'apprentissage du droit</strong></p>
   <p>
-    <a href="https://lawandcode.com">🌐 Site Web</a> •
-    <a href="mailto:contact@lawandcode.com">📧 Contact</a> •
-    <a href="https://twitter.com/lawandcode">🐦 Twitter</a>
+    <a href="https://lawandcode-app.onrender.com">🌐 Site Web</a> •
+    <a href="mailto:law.and.code.website@gmail.com">📧 Contact</a> •
+    <a href="https://www.linkedin.com/in/divin-tchicaya-19950b255">🐦 LinkedIn</a>
   </p>
 </div>
 
