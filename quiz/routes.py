@@ -182,7 +182,7 @@ def quiz():
         # Parce qu'un titre peut être partagé par plusieurs auteurs
         quiz_id = db_request("SELECT quiz_id FROM quiz_infos WHERE titre = %s AND user_id = %s",
                             (titre, author_id), fetch=True)
-
+        
         if not quiz_id:
             return apology("Quiz introuvable")
         quiz_id = quiz_id[0][0]
@@ -197,16 +197,17 @@ def quiz():
             already_liked = True
         return render_template("quiz.html", type=type, titre=titre, matiere=matiere,
                             already_liked=already_liked, author_id=author_id, quiz_id=quiz_id)
-                            
+
     elif type == "private":
         if not arg_is_present([titre, type]):
             return apology("Titre ou type de quiz manquant")
 
         quiz_id = db_request("SELECT quiz_id FROM quiz_infos WHERE titre = %s AND user_id = %s",
-                            (titre, auteur), fetch=True)
+                            (titre, session.get("user_id")), fetch=True)
         if not quiz_id:
             return apology("Quiz introuvable")
         quiz_id = quiz_id[0][0]
+        print("AUTEUR ET quiz_id:", auteur, quiz_id)
 
         return render_template("quiz.html", type=type, titre=titre, matiere=matiere, quiz_id=quiz_id,
                             already_liked=True)
