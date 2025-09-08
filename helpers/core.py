@@ -185,7 +185,7 @@ def send_reset_email(email, username, token):
             <h2>Réinitialisation de mot de passe</h2>
             <p>Bonjour {username},</p>
             <p>Cliquez sur le lien suivant pour réinitialiser votre mot de passe :</p>
-            <p><a href="http://localhost:5000/auth/reset_password/{token}">Réinitialiser mon mot de passe</a></p>
+            <p><a href="https://lawandcode-app.onrender.com/auth/reset_password/{token}">Réinitialiser mon mot de passe</a></p>
             <p>Ce lien expire dans 1 heure.</p>
             <p>Si vous n'avez pas demandé cette réinitialisation, ignorez cet email.</p>
             <br>
