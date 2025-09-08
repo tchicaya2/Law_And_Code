@@ -1,4 +1,4 @@
-# 🏛️ Law and Code - Plateforme Interactive d'Apprentissage Juridique
+# Law and Code - Plateforme Interactive d'Apprentissage Juridique
 
 [![Python](https://img.shields.io/badge/Python-3.13-blue.svg)](https://python.org)
 [![Flask](https://img.shields.io/badge/Flask-3.0-green.svg)](https://flask.palletsprojects.com)
