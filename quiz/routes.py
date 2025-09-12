@@ -377,7 +377,7 @@ def add_new_question():
                 return apology("Veuillez renseigner tous les champs")
         
         # Vérifier si la question existe déjà dans le dossier de l'utilisateur
-        if db_request("""SELECT * FROM quiz_questions 
+        if db_request("""SELECT 1 FROM quiz_questions 
                       JOIN quiz_infos ON quiz_questions.quiz_id = quiz_infos.quiz_id 
                       WHERE user_id = %s AND question = %s AND titre = %s""",
                        (session.get("user_id"), question, dossier), fetch=True):
@@ -599,7 +599,7 @@ def like_quiz():
         return jsonify(success=False, error="Titre manquant")
     
     # Vérifier si l'utilisateur a déjà aimé ce quiz
-    if db_request("""SELECT * FROM quiz_likes JOIN quiz_infos ON quiz_likes.quiz_id = quiz_infos.quiz_id 
+    if db_request("""SELECT 1 FROM quiz_likes JOIN quiz_infos ON quiz_likes.quiz_id = quiz_infos.quiz_id 
                   WHERE quiz_likes.user_id = %s AND quiz_infos.titre = %s""",
                    (session.get("user_id"), titre), fetch=True):
       
@@ -641,7 +641,7 @@ def modify_quiz_infos(): # Modifier les informations du quiz (accès, niveau, ma
                                 message="Type d'accès invalide", dossier=titre, matiere=matiere))
 
     # Vérifier si le titre existe pour l'utilisateur
-    if not db_request("SELECT * FROM quiz_infos WHERE titre = %s AND user_id = %s",
+    if not db_request("SELECT 1 FROM quiz_infos WHERE titre = %s AND user_id = %s",
                       (titre, author_id), fetch=True):
         return redirect(url_for('quiz.modify_quiz_questions', 
                                 message="Quiz introuvable", dossier=titre, matiere=matiere))
