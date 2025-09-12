@@ -37,7 +37,7 @@ def login():
 
         # Ensure username exists and password is correct
         rows = db_request("SELECT * FROM users WHERE username = %s", (username,))
-        if rows[0][6] == True:
+        if rows and rows[0][6] == True:
             special_error_feedback = "Votre compte est désactivé"
             return render_template("login.html", special_error_feedback=special_error_feedback, next=next_url,
                                    username=username), 403
