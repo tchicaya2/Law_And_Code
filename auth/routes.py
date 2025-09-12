@@ -37,6 +37,10 @@ def login():
 
         # Ensure username exists and password is correct
         rows = db_request("SELECT * FROM users WHERE username = %s", (username,))
+        if rows[0][6] == True:
+            special_error_feedback = "Votre compte est désactivé"
+            return render_template("login.html", special_error_feedback=special_error_feedback, next=next_url,
+                                   username=username), 403
         if not rows:
             special_error_feedback = "Mot de passe ou nom d'utilisateur incorrect"
             return render_template("login.html", special_error_feedback=special_error_feedback, next=next_url, 
@@ -337,19 +341,29 @@ def remove_email():
     message = "Adresse email supprimée avec succès. Vous ne pourrez plus récupérer votre mot de passe par email."
     return redirect(url_for('main.profile', message=message))
 
-        
-@auth_bp.route("/delete_account") # Route pour supprimer le compte de l'utilisateur
+
+@auth_bp.route("/delete_account", methods=["POST"]) # Route pour supprimer le compte de l'utilisateur
 @login_required
 def delete_account():
 
     user_id = session.get("user_id")
-    # Supprimer l'utilisateur de la table users
-    # Les autres données associées seront supprimées par la contrainte ON DELETE CASCADE
-    db_request("DELETE FROM users WHERE id = %s", (user_id,), fetch=False)
+    provided_authentication_token = request.form.get("authentication_token")
 
-    session.clear()
-    message = "Votre compte ainsi que toutes les données associées ont été supprimés avec succès."
-    return redirect(url_for('main.index', message=message))
+    actual_authentication_token = db_request("SELECT authentication_token FROM users WHERE id = %s",
+    (user_id,))[0][0]
+
+    if not provided_authentication_token or provided_authentication_token != actual_authentication_token:
+        return apology("Erreur sur la provenance de la requête")
+
+    else:
+
+        # Supprimer l'utilisateur de la table users
+        # Les autres données associées seront supprimées par la contrainte ON DELETE CASCADE
+        db_request("DELETE FROM users WHERE id = %s", (user_id,), fetch=False)
+
+        session.clear()
+        message = "Votre compte ainsi que toutes les données associées ont été supprimés avec succès."
+        return redirect(url_for('main.index', message=message))
 
 
 @auth_bp.route("/forgot_password", methods=["GET", "POST"])

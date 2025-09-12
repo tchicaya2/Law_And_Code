@@ -10,26 +10,16 @@ from unittest.mock import patch, MagicMock
 # Ajouter le répertoire parent au path pour les imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# Import avec gestion d'erreur pour les tests
-try:
-    from app import app
-    from helpers import get_connection, db_request
-except ImportError:
-    # Créer une app Flask minimale pour les tests si l'import échoue
-    from flask import Flask
-    app = Flask(__name__)
-    app.config['TESTING'] = True
-    app.config['SECRET_KEY'] = 'test-secret-key'
-    
-    # Mock des fonctions helpers
-    def get_connection():
-        return MagicMock()
-    
-    def db_request(query, params=None, fetch=True):
-        return []
+# Configuration d'environnement pour les tests (désactiver la vraie DB)
+os.environ['DATABASE_URL'] = 'postgresql://mock:mock@localhost/mock_db'
+os.environ['SECRET_KEY'] = 'test-secret-key'
+os.environ['FLASK_ENV'] = 'testing'
 
-# Configuration de test
-TEST_DATABASE_URL = os.environ.get('TEST_DATABASE_URL', 'postgresql://test_user:test_pass@localhost/test_lawandcode')
+# Mock global du pool de connexions pour tous les tests
+with patch('helpers.core.initialize_db_pool'):
+    with patch('helpers.core.get_connection'):
+        from app import app
+
 
 @pytest.fixture(scope='session')
 def test_app():
@@ -40,8 +30,9 @@ def test_app():
         'TESTING': True,
         'WTF_CSRF_ENABLED': False,
         'SECRET_KEY': 'test-secret-key',
-        'DATABASE_URL': TEST_DATABASE_URL,
+        'DATABASE_URL': 'postgresql://mock:mock@localhost/mock_db',
         'SENTRY_DSN': None,  # Désactiver Sentry en test
+        'ADMIN_USER_ID': '1',
     })
     
     return app
@@ -70,27 +61,12 @@ def mock_db():
 def authenticated_user(client):
     """Utilisateur authentifié pour les tests"""
     
-    # Créer un utilisateur de test
-    test_user_data = {
-        'username': 'test_user',
-        'password': 'TestPass123!',
-        'email': 'test@example.com'
-    }
-    
-    # S'inscrire
-    response = client.post('/auth/register', data={
-        'username': test_user_data['username'],
-        'password': test_user_data['password'],
-        'confirmation': test_user_data['password'],
-        'email': test_user_data['email']
-    })
-    
-    # Se connecter
+    # Simuler un utilisateur connecté
     with client.session_transaction() as sess:
         sess['user_id'] = 1
-        sess['username'] = test_user_data['username']
+        sess['username'] = 'test_user'
     
-    return test_user_data
+    return {'user_id': 1, 'username': 'test_user'}
 
 
 @pytest.fixture(scope='function')
@@ -117,51 +93,6 @@ def sample_quiz_data():
     }
 
 
-class DatabaseTestHelper:
-    """Helper pour les tests avec base de données"""
-    
-    @staticmethod
-    def setup_test_data():
-        """Créer des données de test dans la base"""
-        
-        # Créer un utilisateur de test
-        db_request("""
-            INSERT INTO users (username, hash, email, authentication_token) 
-            VALUES (%s, %s, %s, %s)
-            ON CONFLICT (username) DO NOTHING
-        """, ('test_user', 'test_hash', 'test@example.com', 'test_token'), fetch=False)
-        
-        # Créer des quiz de test
-        db_request("""
-            INSERT INTO quiz (title, description, matiere, creator_id, is_public) 
-            VALUES (%s, %s, %s, %s, %s)
-            ON CONFLICT DO NOTHING
-        """, ('Test Quiz', 'Description test', 'Droit Civil', 1, True), fetch=False)
-    
-    @staticmethod
-    def cleanup_test_data():
-        """Nettoyer les données de test"""
-        
-        # Supprimer dans l'ordre inverse des dépendances
-        tables_to_clean = [
-            'quiz_attempts',
-            'stats', 
-            'messages',
-            'password_reset_tokens',
-            'login_attempts',
-            'quiz_questions',
-            'quiz',
-            'users'
-        ]
-        
-        for table in tables_to_clean:
-            try:
-                db_request(f"DELETE FROM {table} WHERE username = %s OR creator_id = 1", 
-                          ('test_user',), fetch=False)
-            except:
-                pass  # Table peut ne pas exister ou contrainte OK
-
-
 # Utilitaires de test
 def assert_json_response(response, expected_status=200):
     """Vérifier qu'une réponse est du JSON valide"""
@@ -179,28 +110,14 @@ def assert_redirect(response, expected_location=None):
 
 def assert_template_used(response, template_name):
     """Vérifier qu'un template spécifique a été utilisé"""
-    # Cette fonction nécessiterait Flask-Testing pour être complète
     assert response.status_code == 200
-    # Vérification basique par contenu
     content = response.data.decode('utf-8')
-    assert template_name.replace('.html', '') in content or 'html' in content
+    assert 'html' in content
 
 
 # Décorateurs pour les tests
 def requires_auth(test_func):
     """Décorateur pour tests nécessitant une authentification"""
     def wrapper(*args, **kwargs):
-        # Ajouter la logique d'auth si nécessaire
         return test_func(*args, **kwargs)
-    return wrapper
-
-
-def with_test_data(test_func):
-    """Décorateur pour tests nécessitant des données de test"""
-    def wrapper(*args, **kwargs):
-        DatabaseTestHelper.setup_test_data()
-        try:
-            return test_func(*args, **kwargs)
-        finally:
-            DatabaseTestHelper.cleanup_test_data()
     return wrapper

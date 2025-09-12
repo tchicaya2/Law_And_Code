@@ -142,6 +142,11 @@ main {
 .container {
     max-width: 900px;
 }
+.form-control {
+    border-radius: 8px;
+    font-size: 1.1rem;
+    padding: 12px;
+}
 
 /* Responsive design */
 @media (max-width: 768px) {

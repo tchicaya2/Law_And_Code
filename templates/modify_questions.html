@@ -51,7 +51,7 @@
     }
     
     .header-right {
-      flex-shrink: 0;
+      flex-shrink: 0; /* Empêche le rétrécissement du formulaire */
     }
     
     /* Responsive */
@@ -68,6 +68,13 @@
       
       .header-right {
         align-self: center;
+      }
+
+      .header-right form {
+        flex-direction: column !important;
+        gap: 12px !important;
+        align-items: stretch !important;
+        max-width: 300px;
       }
       
       .play-quiz-btn {
@@ -103,14 +110,32 @@
         </div>
     {% endif %}
       
-      <!-- Formulaire de modification d'accès à droite -->
+      <!-- Formulaire de modification d'accès, niveau et matière du quiz à droite -->
       <div class="header-right">
-        <form action="{{ url_for('quiz.modify_quiz_accessibility') }}" 
+        <form action="{{ url_for('quiz.modify_quiz_infos') }}" 
         method="post" style="display: flex; gap: 12px; align-items: center;">
           <input type="hidden" name="titre" value="{{ dossier }}">
-          <input type="hidden" name="matiere" value="{{ matiere }}">
+
+          <select name="matiere" class="form-select" required style="min-width: 140px;">
+            <option value="{{ matiere }}" selected> 
+              {{ matiere }} 
+            </option>
+            {% for matiere in matieres %}
+              <option value="{{ matiere }}">{{ matiere }}</option>
+            {% endfor %}
+          </select>
+
+          <select name="niveau" class="form-select" required style="min-width: 140px;">
+            <option value="{{ niveau }}" selected> 
+              {{ niveau }}
+            </option>
+            {% for niveau in niveaux %}
+              <option value="{{ niveau }}">{{ niveau }}</option>
+            {% endfor %}
+          </select>
+
           <select name="type" class="form-select" required style="min-width: 140px;">
-            <option value="" disabled selected>Accès 
+            <option value="{{ access }}" selected>Accès 
               {% if access == "private" %}
                 Privé
               {% else %}
@@ -120,6 +145,7 @@
             <option value="public">Accès Public</option>
             <option value="private">Accès Privé</option>
           </select>
+
           <button type="submit" class="btn btn-primary" style="min-width: 120px;">
             Modifier
           </button>

@@ -36,11 +36,13 @@ def choix():
                 ORDER BY qi.likes DESC
                 LIMIT 10 OFFSET %s
             """, (offset,))
+
             total_results = len(db_request("""SELECT qq.quiz_id FROM quiz_questions qq LEFT JOIN quiz_infos qi
             ON qq.quiz_id = qi.quiz_id WHERE type = 'public' GROUP BY qq.quiz_id HAVING COUNT(*) > 3;""", fetch=True))
 
         else:
             user_id = session.get("user_id")
+
             rows = db_request("""
                 SELECT qi.titre, qi.quiz_id, COUNT(*) AS nombre_de_questions
                 FROM quiz_questions qq
@@ -50,12 +52,14 @@ def choix():
                 GROUP BY qi.titre, qi.quiz_id
                 LIMIT 10 OFFSET %s
             """, (user_id, offset))
+
             total_results = db_request(
             """SELECT COUNT(*) FROM quiz_infos
             WHERE user_id = %s""",
             (user_id,), fetch=True)[0][0]
         
         total_pages = (total_results + 9) // 10
+
         # Extrait les données de chaque tuple selon le type de quiz (moins de données si quiz privés)
         dossiers = [{"titre": row[0], "user_id": row[1], "matiere": row[2], 
                     "niveau": row[3], "nombre_de_questions": row[4], 
@@ -69,15 +73,15 @@ def choix():
         query = request.form.get("query").strip() if request.form.get("query") else None
         page = int(request.form.get("page")) if request.form.get("page") else 1
         offset = int(page) * 10 - 10
-        print("OFFSET:", offset)
-        print("TYPE:", request.form.get("quiz_type"))
         type = request.form.get("quiz_type")
     
         if not query:
             return apology("Veuillez fournir un terme de recherche")
+
         # On nettoie la requête pour éviter les injections SQL
         # Nettoyage spécifique aux requêtes ILIKE
         param = f"%{query}%"
+        
         rows = db_request("""
             SELECT titre, username, matiere, niveau, COUNT(*) AS nombre_de_questions, likes, type 
             FROM quiz_questions 
@@ -114,7 +118,9 @@ def choix():
         # contenu dans la liste de tuples que renvoie la base de données
         dossiers = [{"titre": row[0], "user_id": row[1], "matiere": row[2], 
                     "niveau": row[3], "nombre_de_questions": row[4], "likes": row[5]} for row in rows] if type =="public" else [{"titre": row[0], "nombre_de_questions": row[1]} for row in rows]
+        
         result_feedback = f"{total_results} résultat(s) trouvé(s) pour '{query}'" if dossiers else f"Aucun résultat trouvé pour '{query}'"
+        
         return render_template("choice.html", type=type, response=dossiers, 
                                result_feedback=result_feedback, query=query,
                             total_results=total_results, total_pages=total_pages, page=page)
@@ -126,14 +132,17 @@ def choix():
 def get_public_questions():
 
     quiz_id = request.args.get("quiz_id")
+
     if not arg_is_present([quiz_id]):
         return apology("titre manquant")
 
     try:
         rows = db_request("""SELECT réponse, question FROM quiz_questions
                            WHERE quiz_id = %s""", (quiz_id,), fetch=True)
+
         if len(rows) < 4:
             return apology("Le quiz ne contient pas assez de questions")
+
         return jsonify(rows)
         
     except Exception as e:
@@ -146,14 +155,17 @@ def get_public_questions():
 def get_private_questions():
 
     quiz_id = request.args.get("quiz_id")
+
     if not arg_is_present([quiz_id]):
         return apology("titre manquant")
 
     rows = db_request("""SELECT réponse, question FROM quiz_questions
                       WHERE quiz_id = %s""",
                       (quiz_id,), fetch=True)
+
     if len(rows) < 4:
         return apology("Le quiz ne contient pas assez de questions")
+        
     return jsonify(rows)
 
 
@@ -165,52 +177,66 @@ def quiz():
     type = request.args.get("type")
     # auteur peut être le nom complet de l'auteur ou directement son id dans la base de données
     auteur = request.args.get("auteur")
+
     if type == "public":
+
         if not arg_is_present([titre, matiere, type, auteur]):
             return apology("Titre, matière, type ou auteur de quiz manquant")
+
         try:
             # On essaie une conversion dans le cas où l'argument "auteur" est venu sous forme d'id directement
             author_id = int(auteur)
         # En cas d'échec de la conversion, alors l'argument "auteur" est venu sous forme de nom 
         # On utilise alors ce nom pour récupérer l'id dans la base de données
+
         except ValueError:
             author_id = db_request("SELECT id FROM users WHERE username = %s", (auteur,), fetch=True)
             author_id = author_id[0][0]
+
         if not author_id:
             return apology("Auteur introuvable")
         # On retrouve l'id du quiz pour l'auteur correspondant
         # Parce qu'un titre peut être partagé par plusieurs auteurs
+
         quiz_id = db_request("SELECT quiz_id FROM quiz_infos WHERE titre = %s AND user_id = %s",
                             (titre, author_id), fetch=True)
         
         if not quiz_id:
             return apology("Quiz introuvable")
+
         quiz_id = quiz_id[0][0]
 
         already_liked = db_request(
             "SELECT 1 FROM quiz_likes WHERE user_id = %s AND quiz_id = %s",
             (session.get("user_id"), quiz_id,)
         )
+
         if not already_liked:
             already_liked = False
+
         else:
             already_liked = True
+
         return render_template("quiz.html", type=type, titre=titre, matiere=matiere,
                             already_liked=already_liked, author_id=author_id, quiz_id=quiz_id)
 
     elif type == "private":
+
         if not arg_is_present([titre, type]):
+
             return apology("Titre ou type de quiz manquant")
 
         quiz_id = db_request("SELECT quiz_id FROM quiz_infos WHERE titre = %s AND user_id = %s",
                             (titre, session.get("user_id")), fetch=True)
+
         if not quiz_id:
             return apology("Quiz introuvable")
+
         quiz_id = quiz_id[0][0]
-        print("AUTEUR ET quiz_id:", auteur, quiz_id)
 
         return render_template("quiz.html", type=type, titre=titre, matiere=matiere, quiz_id=quiz_id,
                             already_liked=True)
+
     else:
         return apology("Type de quiz invalide")
 
@@ -235,8 +261,9 @@ def update_stats():
     if not arg_is_present([matiere, posées, trouvées, quiz_id]):
         return apology("Matière, nombre de questions ou quiz manquant")
 
-    attempt = db_request("SELECT * FROM quiz_attempts WHERE user_id = %s AND quiz_id = %s",
+    attempt = db_request("SELECT 1 FROM quiz_attempts WHERE user_id = %s AND quiz_id = %s",
                    (session.get("user_id"), quiz_id))
+
     if attempt:
         return '', 204  # Si l'utilisateur a déjà joué ce quiz, on n'update pas les stats
 
@@ -248,10 +275,12 @@ def update_stats():
     # Vérifier si l'utilisateur a une ligne dans la db pour la matière qu'il vient de jouer
     if not db_request("SELECT matiere FROM stats WHERE matiere = %s AND user_id = %s",
                      (matiere, session.get("user_id"),)):
+
         # Si l'utilisateur n'a pas encore une ligne pour cette matière (parce qu'il y a jamais joué)
         # On crée une nouvelle ligne pour cette matière pour l'utilisateur
         db_request("INSERT INTO stats (user_id, matiere, posées, trouvées) VALUES (%s, %s, %s, %s)",
                        (session.get("user_id"), matiere, posées, trouvées,), fetch=False)
+
     else:  
         # Sinon, l'utilisateur a déjà joué à un quiz dans cette matière
         # la ligne est déjà présente, on update juste le nombre les résultats
@@ -286,39 +315,42 @@ def choose_file():
 @quiz_bp.route("/create_new_quiz_file", methods=["POST"]) 
 @login_required
 def create_new_quiz_file():
-
-    nom_de_dossier = clean_arg(request.form.get("dossier")) # Entrée de l'utilisateur, donc on utilise clean_arg
-    matiere = request.form.get("matiere") # Valeur contrôlée (champ select), donc pas de clean_arg 
+    nom_de_dossier = clean_arg(request.form.get("dossier"))
+    matiere = request.form.get("matiere")
     niveau = request.form.get("niveau")
 
     if not arg_is_present([nom_de_dossier, matiere, niveau]):
         message = "Veuillez renseigner correctement tous les champs pour créer un dossier"
         return redirect(url_for('quiz.choose_file', message=message))
-    if len(nom_de_dossier) > 100:
-        message = "Le nom de dossier est trop long. Il doit faire moins de 100 caractères"
-        return redirect(url_for('quiz.choose_file', message=message))
-    # Vérifier si un dossier avec le même nom existe déjà pour l'utilisateur
-    if db_request("SELECT * FROM quiz_infos WHERE user_id = %s AND titre = %s",
-                   (session.get("user_id"), nom_de_dossier), fetch=True):
+
+    # Vérification proactive (toujours garder la contrainte DB aussi !)
+    existing_quiz = db_request("SELECT 1 FROM quiz_infos WHERE user_id = %s AND titre = %s",
+                              (session.get("user_id"), nom_de_dossier), fetch=True)
+    
+    if existing_quiz:
         error_msg = "Un dossier avec ce nom existe déjà"
-        # Redirige vers la page de choix de fichier si le dossier existe déjà
         return redirect(url_for('quiz.choose_file', error_msg=error_msg, error=True))
-    if matiere.lower() not in [m.lower() for m in matieres]:
-        print("MATIERE", matiere)
-        message = "Matière invalide. Veuillez choisir une matière valide"
-        return redirect(url_for('quiz.choose_file', message=message))
-    if niveau.lower() not in [n.lower() for n in niveaux]:
-        message = "Niveau invalide. Veuillez choisir un niveau valide"
-        return redirect(url_for('quiz.choose_file', message=message))
-    # Si tout est bon, on crée le dossier
-    else:
-        # Redirige vers la page de modification des questions du quiz privé 
-        # avec le dossier sélectionné
+
+    # Insertion avec protection supplémentaire contre race conditions
+    try:
         db_request("INSERT INTO quiz_infos (user_id, titre, matiere, niveau) VALUES (%s, %s, %s, %s)",
                    (session.get("user_id"), nom_de_dossier, matiere, niveau), fetch=False)
+        
         message = "Dossier créé avec succès"
+        access = "private"
+        
         return redirect(url_for('quiz.modify_quiz_questions',
-                                dossier=nom_de_dossier, matiere=matiere, message=message))
+                                dossier=nom_de_dossier, matiere=matiere, 
+                                niveau=niveau, message=message, access=access))
+    
+    except Exception as e:
+        # Double protection au cas où la race condition se produit quand même
+        if "quiz_infos_titre_user_id_unique" in str(e) or "duplicate key" in str(e).lower():
+            error_msg = "Un dossier avec ce nom existe déjà"
+        else:
+            error_msg = "Erreur lors de la création du dossier. Veuillez réessayer."
+        
+        return redirect(url_for('quiz.choose_file', error_msg=error_msg, error=True))
 
 
 # Route pour ajouter une nouvelle question dans un quiz privé
@@ -326,15 +358,21 @@ def create_new_quiz_file():
 @login_required
 def add_new_question():
 
-    if request.method == "POST": 
+    if request.method == "POST":
+
         question = clean_arg(request.form.get("question"))
+
         if len(question) > 500:
             return apology("La question est trop longue, elle doit faire 500 caractères maximum")
+
         reponse = clean_arg(request.form.get("réponse"))
+
         if len(reponse) > 250:
             return apology("La réponse est trop longue, elle doit faire 250 caractères maximum")
+
         dossier = request.args.get("dossier")
         matiere = request.args.get("matiere")
+
         if not arg_is_present([question, reponse, dossier, matiere]):
                 return apology("Veuillez renseigner tous les champs")
         
@@ -343,20 +381,29 @@ def add_new_question():
                       JOIN quiz_infos ON quiz_questions.quiz_id = quiz_infos.quiz_id 
                       WHERE user_id = %s AND question = %s AND titre = %s""",
                        (session.get("user_id"), question, dossier), fetch=True):
+
             error_msg = "Cette question existe déjà dans ce dossier"
+
             return redirect(url_for('quiz.modify_quiz_questions', dossier=dossier, error_msg=error_msg, matiere=matiere))
+        
         else: # Si la question n'existe pas, on l'insère
+
             quiz_id_row = db_request("SELECT quiz_id FROM quiz_infos WHERE titre = %s AND user_id = %s",
                                  (dossier, session.get("user_id"),), fetch=True)
+
             if not quiz_id_row:
                 return apology("Quiz introuvable")
+
             quiz_id = quiz_id_row[0][0]
+
             db_request("""INSERT INTO quiz_questions (quiz_id, question, réponse) 
                        VALUES (%s, %s, %s)""",
                       (quiz_id, question, reponse), fetch=False)
+
             message = "Question ajoutée avec succès"
             # Redirige vers la page de modification des questions du quiz privé 
             # avec le dossier sélectionné
+
             return redirect(url_for('quiz.modify_quiz_questions', dossier=dossier, message=message, matiere=matiere))
 
 
@@ -369,53 +416,72 @@ def modify_quiz_questions():
     if request.method == "GET": 
         dossier = request.args.get("dossier").strip() if request.args.get("dossier") else None
         matiere = request.args.get("matiere").strip() if request.args.get("matiere") else None
+        niveau = request.args.get("niveau").strip() if request.args.get("niveau") else None
+        access = request.args.get("access").strip() if request.args.get("access") else None
+
+        # Récupérer les messages de succès ou d'erreur
         message = request.args.get("message") if request.args.get("message") else None
         error_msg = request.args.get("error_msg") if request.args.get("error_msg") else None
+
         if not arg_is_present([dossier, matiere]):
             return apology("Dossier ou matière manquant")
+
+        if not access or not niveau:
+            niveau_and_access = db_request("SELECT niveau, type FROM quiz_infos WHERE titre = %s AND user_id = %s",
+                           (dossier, session.get("user_id"),), fetch=True)
+            
+            if not niveau_and_access: # Le quiz n'existe probablement pas
+                return apology("Quiz introuvable")
+
+            niveau = niveau_and_access[0][0]  # On récupère le niveau
+            access = niveau_and_access[0][1]  # On récupère le type d'accès (public ou privé)
+        
         rows = db_request("""SELECT question, réponse FROM quiz_questions 
                           JOIN quiz_infos ON quiz_questions.quiz_id = quiz_infos.quiz_id 
                           WHERE titre = %s AND user_id = %s ORDER BY quiz_questions.id""",
                           (dossier, session.get("user_id"),))
-        # Récupérer le type d'accès au quiz (accès public ou privé)
-        access = db_request("SELECT type FROM quiz_infos WHERE titre = %s AND user_id = %s",
-                           (dossier, session.get("user_id"),), fetch=True)
-        if not access:
-            return apology("Dossier introuvable")
-        access = access[0][0]  # On récupère le type d'accès (public ou privé)
 
         # Si le dossier est vide, alors c'est un nouveau dossier que l'utilisateur veut créer
         # On renvoie donc la page de modification de questions pour ce nouveau dossier
         if not rows: 
-            return render_template("modify_questions.html", dossier=dossier, message=message,
-            error_msg=error_msg, access=access, matiere=matiere)
+            return render_template("modify_questions.html", dossier=dossier, 
+                               access=access, message=message, error_msg=error_msg, 
+                               matiere=matiere, niveau=niveau, matieres=matieres, niveaux=niveaux)
+
         # Sinon, on renvoie la page de modification avec les questions existantes
         return render_template("modify_questions.html", questions=rows, dossier=dossier, 
-                               access=access, message=message, error_msg=error_msg, matiere=matiere)
+                               access=access, message=message, error_msg=error_msg, 
+                               matiere=matiere, niveau=niveau, matieres=matieres, niveaux=niveaux)
 
     # Gère la modification d'une question d'un quiz privé
     else:
         initial_question = request.form.get("initial_question")
         initial_reponse = request.form.get("initial_answer")
+
         if not arg_is_present([initial_question, initial_reponse]):
             return apology("Question ou réponse initiale manquante")
+
         question = clean_arg(request.form.get("question"))
         reponse = clean_arg(request.form.get("réponse"))
         dossier = request.args.get("dossier") # J'utilise clean_arg que sur les entrées utilisateurs,
         # pas sur les champs que j'ai moi-même passés au template
         matiere = request.args.get("matiere")
+
         if not arg_is_present([question, reponse, dossier]):
             return apology("Veuillez renseigner tous les champs")
         if len(question) > 500:
             return apology("La question est trop longue, elle doit faire moins de 500 caractères")
         if len(reponse) > 250:
             return apology("La réponse est trop longue, elle doit faire moins de 250 caractères")
+
         # Vérifier si la question existe déjà dans le dossier de l'utilisateur
         if db_request("""SELECT id FROM quiz_questions
                       JOIN quiz_infos ON quiz_questions.quiz_id = quiz_infos.quiz_id
                       WHERE user_id = %s AND question = %s AND réponse = %s AND titre = %s""",
                        (session.get("user_id"), question, reponse, dossier), fetch=True):
+                       
             error_msg = "Cette question existe déjà dans ce dossier"
+
             return redirect(url_for('quiz.modify_quiz_questions', dossier=dossier, error_msg=error_msg, matiere=matiere))
         quiz_id_row = db_request("SELECT quiz_id FROM quiz_infos WHERE titre = %s AND user_id = %s",
                                  (dossier, session.get("user_id"),), fetch=True)
@@ -423,14 +489,17 @@ def modify_quiz_questions():
         if not quiz_id_row:
             return apology("Quiz introuvable")
         quiz_id = quiz_id_row[0][0]
+
         # On met à jour la question et la réponse dans la base de données
         db_request("""UPDATE quiz_questions
                    SET question = %s, réponse = %s WHERE quiz_id = %s
                    AND question = %s AND réponse = %s""",
                     (question, reponse, quiz_id, initial_question, initial_reponse,), fetch=False)
+
         message = "Question modifiée avec succès"
         # Redirige vers la page de modification des questions du quiz privé 
         # avec le dossier sélectionné
+
         return redirect(url_for('quiz.modify_quiz_questions', dossier=dossier, message=message, matiere=matiere))
 
 
@@ -444,18 +513,25 @@ def delete_quiz_questions():
         question = request.form.get("question").strip() if request.form.get("question") else None
         reponse = request.form.get("réponse").strip() if request.form.get("réponse") else None
         matiere = request.form.get("matiere").strip() if request.form.get("réponse") else None
+
         if not arg_is_present([dossier, question, reponse, matiere]):
             return apology("Dossier, question ou réponse manquante")
+
         quiz_id = db_request("SELECT quiz_id FROM quiz_infos WHERE titre = %s AND user_id = %s",
                              (dossier, session.get("user_id"),), fetch=True)
+
         if not quiz_id:
             return apology("Quiz introuvable")
+
         # On récupère l'ID du quiz pour supprimer la question
         quiz_id = quiz_id[0][0]
+
         db_request("""DELETE FROM quiz_questions
                    WHERE quiz_id = %s AND question = %s AND réponse = %s""",
                     (quiz_id, question, reponse), fetch=False)
+                    
         message = "Question supprimée avec succès"
+
         # Redirige vers la page de modification des questions du quiz privé 
         # avec le dossier sélectionné
         return redirect(url_for('quiz.modify_quiz_questions', dossier=dossier, message=message, matiere=matiere))
@@ -468,20 +544,27 @@ def rename_file():
 
     nouveau_nom = clean_arg(request.form.get("newName"))
     dossier = request.args.get("dossier")
+
     if not arg_is_present([dossier, nouveau_nom]):
         return apology("Dossier ou nouveau nom manquant")
+
     if len(nouveau_nom) > 100:
         return apology("Le nouveau nom est trop long, il doit faire moins de 50 caractères")
-    if db_request("SELECT * FROM quiz_infos WHERE titre = %s AND user_id = %s",
+
+    if db_request("SELECT 1 FROM quiz_infos WHERE titre = %s AND user_id = %s",
                    (nouveau_nom, session.get("user_id"),), fetch=True):
-        message = "Un dossier avec ce nom existe déjà"
+
+        error_msg = "Un dossier avec ce nom existe déjà"
+
         # Redirige vers la page de choix de fichier si le nom existe déjà
         # pour éviter les doublons
-        return redirect(url_for('quiz.choose_file', message=message)) 
+        return redirect(url_for('quiz.choose_file', error_msg=error_msg)) 
+
     db_request("UPDATE quiz_infos SET titre = %s WHERE titre = %s AND user_id = %s",
                (nouveau_nom, dossier, session.get("user_id"),), fetch=False)
 
     message = "Dossier renommé avec succès"
+
     return redirect(url_for('quiz.choose_file', message=message))
 
 
@@ -491,13 +574,16 @@ def rename_file():
 def delete_file():
 
     dossier = request.args.get("dossier").strip() if request.args.get("dossier") else None
+
     if not dossier:
         return apology("Dossier manquant")
+
     db_request("DELETE FROM quiz_infos WHERE titre = %s AND user_id = %s", 
                (dossier, session.get("user_id"),), fetch=False)
+
     # Redirige vers la page de choix de fichier après la suppression du dossier
     message = "Dossier supprimé avec succès"
-    print("SESSION USER ID:", session.get("user_id"))
+
     return redirect(url_for('quiz.choose_file', message=message))
 
 # Aimer un quiz public
@@ -522,9 +608,12 @@ def like_quiz():
     # Ajouter le like dans la base de données
     quiz_id_row = db_request("SELECT quiz_id FROM quiz_infos WHERE titre = %s AND user_id = %s"
                              , (titre, author_id), fetch=True)
+
     if not quiz_id_row:
         return jsonify(success=False, error="Quiz introuvable")
+
     quiz_id = quiz_id_row[0][0]
+
     db_request("INSERT INTO quiz_likes (user_id, quiz_id) VALUES (%s, %s) ON CONFLICT (quiz_id, user_id) DO NOTHING",
                (session.get("user_id"), quiz_id), fetch=False)
 
@@ -533,32 +622,36 @@ def like_quiz():
 
     return jsonify(success=True, message="Quiz aimé avec succès")
 
-@quiz_bp.route("/modify_quiz_accessibility", methods=["POST"])
+@quiz_bp.route("/modify_quiz_infos", methods=["POST"])
 @login_required
-def modify_quiz_accessibility():
+def modify_quiz_infos(): # Modifier les informations du quiz (accès, niveau, matière)
 
     type = request.form.get("type").strip() if request.form.get("type") else None
-    titre = request.form.get("titre").strip() if request.form.get("titre") else None
+    niveau = request.form.get("niveau").strip() if request.form.get("niveau") else None
     matiere = request.form.get("matiere").strip() if request.form.get("matiere") else None
+    titre = request.form.get("titre").strip() if request.form.get("titre") else None
     author_id = session.get("user_id")
-    if not arg_is_present([titre, type, matiere]):
+
+    if not arg_is_present([type, niveau, matiere, titre]):
         return redirect(url_for('quiz.modify_quiz_questions', 
-                                message="Titre, type d'accès ou matière manquant", dossier=titre))
+                                message="Type d'accès, niveau, matière ou titre manquant", dossier=titre))
+
     if type not in ["public", "private"]:
         return redirect(url_for('quiz.modify_quiz_questions', 
                                 message="Type d'accès invalide", dossier=titre, matiere=matiere))
+
     # Vérifier si le titre existe pour l'utilisateur
     if not db_request("SELECT * FROM quiz_infos WHERE titre = %s AND user_id = %s",
                       (titre, author_id), fetch=True):
         return redirect(url_for('quiz.modify_quiz_questions', 
                                 message="Quiz introuvable", dossier=titre, matiere=matiere))
-    # Mettre à jour le type d'accès du quiz
-    updated = db_request("UPDATE quiz_infos SET type = %s WHERE titre = %s AND user_id = %s",
-               (type, titre, author_id), fetch=False)
-    if type == "public":
-        message = "Le quiz est désormais accessible publiquement (à condition qu'il ait au moins 4 questions)"
-    else:
-        message = "Le quiz est désormais privé"
+
+    # Mettre à jour les informations du quiz
+    updated = db_request("""UPDATE quiz_infos SET type = %s, niveau = %s, matiere = %s 
+    WHERE titre = %s AND user_id = %s""",
+               (type, niveau, matiere, titre, author_id), fetch=False)
+
+    message = "Informations du quiz mises à jour avec succès"
 
     return redirect(url_for('quiz.modify_quiz_questions', 
                             message=message, dossier=titre, matiere=matiere))

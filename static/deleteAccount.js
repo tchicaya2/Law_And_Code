@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", function() {
             confirmDeletion.hidden = false;
             deletion_confirmed.addEventListener("click", function(){
                 // Rediriger vers le lien de suppression
-                window.location.href = delete_account.href; 
+                delete_account.submit(); 
             })
             deletion_cancelled.addEventListener("click", function(){
                 confirmDeletion.hidden = true; // Cache la confirmation de suppression

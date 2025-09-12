@@ -37,7 +37,7 @@
             </div>
             <div class="mt-2" style="display: flex; justify-content: center; 
             align-items: center; width: 60vw;">
-                <select name="matiere" class="form-select">
+                <select name="matiere" class="form-select" required>
                 <option disabled selected value="">Matière</option>
                 {% for matiere in matieres %}
                     <option value="{{ matiere }}">{{ matiere }}</option>
@@ -46,7 +46,7 @@
             </div>
             <div class="mt-2" style="display: flex; justify-content: center; 
             align-items: center; width: 60vw;">
-                <select name="niveau" class="form-select">
+                <select name="niveau" class="form-select" required>
                 <option disabled selected value="">Niveau</option>
                 {% for niveau in niveaux %}
                     <option value="{{ niveau }}">{{ niveau }}</option>
