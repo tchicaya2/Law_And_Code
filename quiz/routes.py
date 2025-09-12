@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, render_template, request, session, redirect, url_for
-from helpers import login_required, apology, db_request, arg_is_present, clean_arg
+from helpers import login_required, apology, db_request, arg_is_present, clean_arg, log_security_event
 
 quiz_bp = Blueprint('quiz', __name__, url_prefix='/quiz')
 
@@ -376,37 +376,56 @@ def add_new_question():
         if not arg_is_present([question, reponse, dossier, matiere]):
                 return apology("Veuillez renseigner tous les champs")
         
-        # Vérifier si la question existe déjà dans le dossier de l'utilisateur
-        if db_request("""SELECT 1 FROM quiz_questions 
-                      JOIN quiz_infos ON quiz_questions.quiz_id = quiz_infos.quiz_id 
-                      WHERE user_id = %s AND question = %s AND titre = %s""",
-                       (session.get("user_id"), question, dossier), fetch=True):
+        # Récupérer le quiz_id d'abord pour optimiser les requêtes
+        quiz_id_row = db_request("SELECT quiz_id FROM quiz_infos WHERE titre = %s AND user_id = %s",
+                             (dossier, session.get("user_id")), fetch=True)
 
+        if not quiz_id_row:
+            return apology("Quiz introuvable")
+
+        quiz_id = quiz_id_row[0][0]
+
+        # Vérification optimisée avec le quiz_id directement
+        existing_question = db_request(
+            "SELECT 1 FROM quiz_questions WHERE quiz_id = %s AND question = %s",
+            (quiz_id, question), fetch=True
+        )
+
+        if existing_question:
             error_msg = "Cette question existe déjà dans ce dossier"
+            return redirect(url_for('quiz.modify_quiz_questions', 
+                                    dossier=dossier, error_msg=error_msg, matiere=matiere))
 
-            return redirect(url_for('quiz.modify_quiz_questions', dossier=dossier, error_msg=error_msg, matiere=matiere))
-        
-        else: # Si la question n'existe pas, on l'insère
-
-            quiz_id_row = db_request("SELECT quiz_id FROM quiz_infos WHERE titre = %s AND user_id = %s",
-                                 (dossier, session.get("user_id"),), fetch=True)
-
-            if not quiz_id_row:
-                return apology("Quiz introuvable")
-
-            quiz_id = quiz_id_row[0][0]
-
+        # Insertion avec gestion des erreurs
+        try:
             db_request("""INSERT INTO quiz_questions (quiz_id, question, réponse) 
-                       VALUES (%s, %s, %s)""",
-                      (quiz_id, question, reponse), fetch=False)
+                    VALUES (%s, %s, %s)""",
+                    (quiz_id, question, reponse), fetch=False)
 
             message = "Question ajoutée avec succès"
-            # Redirige vers la page de modification des questions du quiz privé 
-            # avec le dossier sélectionné
+            return redirect(url_for('quiz.modify_quiz_questions', 
+                                    dossier=dossier, message=message, matiere=matiere))
 
-            return redirect(url_for('quiz.modify_quiz_questions', dossier=dossier, message=message, matiere=matiere))
+        except Exception as e:
+            # Log pour debugging et sécurité
+            log_security_event('quiz_question_add_failed', {
+                'user_id': session.get("user_id"),
+                'quiz_id': quiz_id,
+                'question_length': len(question),
+                'error_type': type(e).__name__,
+                'error': str(e)
+            })
 
+            # Gestion spécifique des violations de contrainte unique
+            if "quiz_questions_question_quiz_id_unique" in str(e) or "duplicate key" in str(e).lower():
+                error_msg = "Cette question existe déjà dans ce dossier (race condition détectée)"
+            elif "not-null" in str(e).lower() or "null" in str(e).lower():
+                error_msg = "Erreur de validation des données"
+            else:
+                error_msg = "Erreur lors de l'ajout de la question"
 
+            return redirect(url_for('quiz.modify_quiz_questions', 
+                                    dossier=dossier, error_msg=error_msg, matiere=matiere))
  # Modifier les questions d'un quiz privé
 @quiz_bp.route("/modify_quiz_questions", methods=["GET", "POST"])
 @login_required
