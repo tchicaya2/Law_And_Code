@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 count.textContent = `${textarea.value.length} / 500`;
             } else if (count.previousElementSibling.getAttribute('name') === 'réponse') {
                 count.textContent = `${textarea.value.length} / 200`;
-            } else if (count.previousElementSibling.getAttribute('name') === 'message') {
+            } else if (count.previousElementSibling.getAttribute('name') === 'msg') {
                 count.textContent = `${textarea.value.length} / 500`;
             }
         }
