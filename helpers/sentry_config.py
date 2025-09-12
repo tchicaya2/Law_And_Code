@@ -33,12 +33,6 @@ def init_sentry(app):
         event_level=logging.ERROR  # Envoie les erreurs comme events à Sentry
     )
     
-    # Initialisation Sentry
-    sentry_sdk.init(
-        dsn=sentry_dsn,
-        environment=environment,
-        release=release,
-        
     # Intégrations automatiques
     integrations = [
         FlaskIntegration(
