@@ -12,7 +12,13 @@ def index():
 @main_bp.route("/messages", methods=["POST"]) 
 def messages(): 
 
-    if request.method == "POST": 
+    if request.method == "POST":
+        # Honeypot check - if the "website" field is filled, it's likely a bot
+        honeypot = request.form.get("website")
+        if honeypot:
+            # Silently reject bot submissions without error message
+            return redirect(url_for('main.about', message="Message envoyé !"))
+            
         sender = request.form.get("name").strip() if request.form.get("name") else None
         message_to_send = request.form.get("msg").strip() if request.form.get("msg") else None
         if not arg_is_present([sender, message_to_send]):

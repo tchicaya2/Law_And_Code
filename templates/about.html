@@ -68,6 +68,11 @@
             </div>
 
             <form action="{{ url_for('main.messages') }}" method="post">
+                <!-- Honeypot field - invisible to users but visible to bots -->
+                <div style="position: absolute; left: -9999px; opacity: 0; pointer-events: none;">
+                    <label for="website">Website (leave blank):</label>
+                    <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+                </div>        
                 <div class="mb-3">
                     <label name ="name" class="form-label">Nom</label>
                     <input class="form-control" id="name" name="name" type="text" 
