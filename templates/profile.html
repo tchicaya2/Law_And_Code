@@ -160,46 +160,73 @@
       <div class="card-body p-4">
         <h2 class="h5 text-danger mb-3"><i class="bi bi-exclamation-triangle me-2"></i>Supprimer mon compte</h2>
         <p class="text-muted mb-3">Cette action est irréversible.</p>
-        <form id="delete_account" action="{{ url_for('auth.delete_account') }}" method="post">
-            <input type="hidden" name="authentication_token" value="{{ authentication_token }}"/>
-            <button type="submit" class="btn btn-danger">
-                <i class="bi bi-trash me-2"></i>Supprimer
-            </button>
-        </form>
+        
+        <!-- Simple bouton, PAS un formulaire -->
+        <button type="button" id="delete_account_btn" class="btn btn-danger">
+            <i class="bi bi-trash me-2"></i>Supprimer
+        </button>
       </div>
     </section>
-  </div>
+
+    <!-- Modal de confirmation avec VRAI formulaire sécurisé -->
     <div id="confirm_deletion" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; 
     background: rgba(30, 41, 59, 0.45); display: flex; justify-content: center; 
     align-items: center; z-index: 9999;" hidden>
         <div style="background: linear-gradient(135deg, #e6ecf7 60%, #bfc6d3 100%); 
         border-radius: 20px; box-shadow: 0 8px 32px rgba(30,41,59,0.18); 
-        padding: 44px 36px 36px 36px; min-width: 340px; max-width: 90vw; text-align: center; 
+        padding: 44px 36px 36px 36px; min-width: 380px; max-width: 90vw; text-align: center; 
         border: 1px solid #bfc6d3; position: relative;">
+            
             <h3 style="margin-top: 0; color: #dc3545; font-weight: 700; font-size: 1.35em;">
                 Voulez-vous vraiment supprimer votre compte ?
             </h3>
-            <p style="color: #6c757d; margin-bottom: 32px; font-size: 1.08em;">
+            <p style="color: #6c757d; margin-bottom: 24px; font-size: 1.08em;">
                 Cette action est <b>irréversible</b>.
             </p>
-            <div style="display: flex; justify-content: center; gap: 24px;">
-                <a class="endbuttons" id="deletion_confirmed" 
-                style="background: linear-gradient(90deg, #dc3545, #f64f43 125%); 
-                color: #fff; padding: 12px 34px; border-radius: 10px; font-weight: 600; 
-                text-decoration: none; box-shadow: 0 2px 8px rgba(220,53,69,0.10); 
-                font-size: 1.08em; border: none; transition: background 0.2s, box-shadow 0.2s;">
-                    Supprimer
-                </a>
-                <a class="endbuttons" id="deletion_cancelled" 
-                style="background: #e6ecf7; color: #333; padding: 12px 34px; 
-                border-radius: 10px; font-weight: 600; text-decoration: none; 
-                border: 1px solid #bfc6d3; font-size: 1.08em; 
-                transition: background 0.2s, border 0.2s;">
-                    Annuler
-                </a>
-            </div>
+            
+            <!-- VRAI formulaire sécurisé dans la modal -->
+            <form id="delete_account_form" action="{{ url_for('auth.delete_account') }}" method="post">
+                <!-- Champ mot de passe OBLIGATOIRE -->
+                <div style="margin-bottom: 24px; text-align: center;">
+                    <label for="confirmation_password" style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">
+                        Confirmez avec votre mot de passe :
+                    </label>
+                    <input type="password" 
+                           id="confirmation_password" 
+                           name="confirmation_password"
+                           placeholder="Entrez votre mot de passe"
+                           style="width: 100%; padding: 12px 16px; border: 2px solid #bfc6d3; 
+                           border-radius: 8px; font-size: 1em; transition: border-color 0.2s;"
+                           required />
+                    <div id="password_error" style="color: #dc3545; font-size: 0.9em; margin-top: 4px; display: none; text-align: center;">
+                        Veuillez entrer votre mot de passe
+                    </div>
+                </div>
+                
+                <!-- Token d'authentification -->
+                <input type="hidden" name="authentication_token" value="{{ authentication_token }}"/>
+                
+                <!-- Boutons d'action -->
+                <div style="display: flex; justify-content: center; gap: 24px;">
+                    <button type="submit" class="btn btn-danger" id="confirm_delete_btn"
+                    style="background: linear-gradient(90deg, #dc3545, #f64f43 125%); 
+                    color: #fff; padding: 12px 34px; border-radius: 10px; font-weight: 600; 
+                    text-decoration: none; box-shadow: 0 2px 8px rgba(220,53,69,0.10); 
+                    font-size: 1.08em; border: none; transition: background 0.2s, box-shadow 0.2s;">
+                        Supprimer définitivement
+                    </button>
+                    <button type="button" id="cancel_delete_btn" 
+                    style="background: #e6ecf7; color: #333; padding: 12px 34px; 
+                    border-radius: 10px; font-weight: 600; text-decoration: none; 
+                    border: 1px solid #bfc6d3; font-size: 1.08em; 
+                    transition: background 0.2s, border 0.2s;">
+                        Annuler
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
+  </div>
 </main>
 
 {% endblock %}

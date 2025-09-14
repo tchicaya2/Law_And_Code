@@ -342,28 +342,66 @@ def remove_email():
     return redirect(url_for('main.profile', message=message))
 
 
-@auth_bp.route("/delete_account", methods=["POST"]) # Route pour supprimer le compte de l'utilisateur
+@auth_bp.route("/delete_account", methods=["POST"]) 
 @login_required
 def delete_account():
-
+    """Supprimer le compte utilisateur avec confirmation par mot de passe"""
+    
     user_id = session.get("user_id")
     provided_authentication_token = request.form.get("authentication_token")
-
+    confirmation_password = request.form.get("confirmation_password")
+    
+    # Validation du token d'authentification
     actual_authentication_token = db_request("SELECT authentication_token FROM users WHERE id = %s",
-    (user_id,))[0][0]
+                                            (user_id,))[0][0]
 
     if not provided_authentication_token or provided_authentication_token != actual_authentication_token:
         return apology("Erreur sur la provenance de la requête")
-
-    else:
-
-        # Supprimer l'utilisateur de la table users
-        # Les autres données associées seront supprimées par la contrainte ON DELETE CASCADE
+    
+    # Validation du mot de passe OBLIGATOIRE
+    if not confirmation_password:
+        return apology("Mot de passe requis pour confirmer la suppression")
+    
+    # Vérifier que le mot de passe est correct
+    user_data = db_request("SELECT hash FROM users WHERE id = %s", (user_id,))
+    if not user_data:
+        return apology("Utilisateur introuvable")
+    
+    stored_password_hash = user_data[0][0]
+    
+    if not check_password_hash(stored_password_hash, confirmation_password):
+        # Log de tentative de suppression avec mauvais mot de passe
+        log_security_event('delete_account_failed', {
+            'user_id': user_id,
+            'reason': 'incorrect_password',
+            'ip': request.remote_addr
+        })
+        return redirect(url_for('main.profile', error_msg="Mot de passe incorrect"))
+    
+    # Suppression sécurisée du compte
+    try:
+        # Log avant suppression (pour audit)
+        log_user_action('account_deleted', {
+            'user_id': user_id,
+            'username': session.get('username'),
+            'deletion_method': 'password_confirmation'
+        })
+        
+        # Supprimer l'utilisateur (CASCADE supprimera les données liées)
         db_request("DELETE FROM users WHERE id = %s", (user_id,), fetch=False)
-
+        
+        # Nettoyer la session
         session.clear()
+        
         message = "Votre compte ainsi que toutes les données associées ont été supprimés avec succès."
         return redirect(url_for('main.index', message=message))
+        
+    except Exception as e:
+        log_security_event('delete_account_error', {
+            'user_id': user_id,
+            'error': str(e)
+        })
+        return apology("Erreur lors de la suppression du compte")
 
 
 @auth_bp.route("/forgot_password", methods=["GET", "POST"])

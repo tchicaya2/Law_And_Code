@@ -43,19 +43,21 @@ def profile():
     
     # Récupérer les statistiques utilisateur directement
     rows = db_request("SELECT matiere, posées, trouvées FROM stats WHERE user_id = %s", (user_id,))
-    email = db_request("SELECT email FROM users WHERE id = %s", (user_id,), fetch=True)
-    authentication_token = db_request("SELECT authentication_token FROM users WHERE id = %s", 
-    (user_id,))[0][0]
+    email_and_authentication_token = db_request("SELECT email, authentication_token FROM users WHERE id = %s", (user_id,), fetch=True)
     
+    email = email_and_authentication_token[0][0] if email_and_authentication_token else None
+    authentication_token = email_and_authentication_token[0][1] if email_and_authentication_token else None
+
     # Récupérer un éventuel message d'erreur si une route a renvoyé vers la route "/profile"
     # avec une variable "message" contenant un texte d'erreur
     message = request.args.get("message") if request.args.get("message") else None
+    error_msg = request.args.get("error_msg") if request.args.get("error_msg") else None
 
     response = make_response(render_template(
         "profile.html", 
         rows=rows, 
         email=email[0][0] if email else None, 
-        message=message,
+        message=message, error_msg=error_msg,
         authentication_token=authentication_token
     ))
 
