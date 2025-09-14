@@ -56,7 +56,7 @@ def profile():
     response = make_response(render_template(
         "profile.html", 
         rows=rows, 
-        email=email[0][0] if email else None, 
+        email=email, 
         message=message, error_msg=error_msg,
         authentication_token=authentication_token
     ))
