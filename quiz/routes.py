@@ -137,7 +137,7 @@ def get_public_questions():
         return apology("titre manquant")
 
     try:
-        rows = db_request("""SELECT réponse, question FROM quiz_questions
+        rows = db_request("""SELECT réponse, question, explication FROM quiz_questions
                            WHERE quiz_id = %s""", (quiz_id,), fetch=True)
 
         if len(rows) < 4:
@@ -159,7 +159,7 @@ def get_private_questions():
     if not arg_is_present([quiz_id]):
         return apology("titre manquant")
 
-    rows = db_request("""SELECT réponse, question FROM quiz_questions
+    rows = db_request("""SELECT réponse, question, explication FROM quiz_questions
                       WHERE quiz_id = %s""",
                       (quiz_id,), fetch=True)
 
@@ -370,6 +370,11 @@ def add_new_question():
         if len(reponse) > 250:
             return apology("La réponse est trop longue, elle doit faire 250 caractères maximum")
 
+        explication = clean_arg(request.form.get("explication")) if request.form.get("explication") else None
+
+        if explication and len(explication) > 500:
+            return apology("L'explication est trop longue, elle doit faire 500 caractères maximum")
+
         dossier = request.args.get("dossier")
         matiere = request.args.get("matiere")
 
@@ -398,9 +403,9 @@ def add_new_question():
 
         # Insertion avec gestion des erreurs
         try:
-            db_request("""INSERT INTO quiz_questions (quiz_id, question, réponse) 
-                    VALUES (%s, %s, %s)""",
-                    (quiz_id, question, reponse), fetch=False)
+            db_request("""INSERT INTO quiz_questions (quiz_id, question, réponse, explication) 
+                    VALUES (%s, %s, %s, %s)""",
+                    (quiz_id, question, reponse, explication), fetch=False)
 
             message = "Question ajoutée avec succès"
             return redirect(url_for('quiz.modify_quiz_questions', 
@@ -455,7 +460,7 @@ def modify_quiz_questions():
             niveau = niveau_and_access[0][0]  # On récupère le niveau
             access = niveau_and_access[0][1]  # On récupère le type d'accès (public ou privé)
         
-        rows = db_request("""SELECT question, réponse FROM quiz_questions 
+        rows = db_request("""SELECT question, réponse, explication FROM quiz_questions 
                           JOIN quiz_infos ON quiz_questions.quiz_id = quiz_infos.quiz_id 
                           WHERE titre = %s AND user_id = %s ORDER BY quiz_questions.id""",
                           (dossier, session.get("user_id"),))
@@ -482,6 +487,7 @@ def modify_quiz_questions():
 
         question = clean_arg(request.form.get("question"))
         reponse = clean_arg(request.form.get("réponse"))
+        explication = clean_arg(request.form.get("explication")) if request.form.get("explication") else None
         dossier = request.args.get("dossier") # J'utilise clean_arg que sur les entrées utilisateurs,
         # pas sur les champs que j'ai moi-même passés au template
         matiere = request.args.get("matiere")
@@ -492,13 +498,15 @@ def modify_quiz_questions():
             return apology("La question est trop longue, elle doit faire moins de 500 caractères")
         if len(reponse) > 250:
             return apology("La réponse est trop longue, elle doit faire moins de 250 caractères")
+        if explication and len(explication) > 500:
+            return apology("L'explication est trop longue, elle doit faire moins de 500 caractères")
 
         # Vérifier si la question existe déjà dans le dossier de l'utilisateur
         if db_request("""SELECT id FROM quiz_questions
                       JOIN quiz_infos ON quiz_questions.quiz_id = quiz_infos.quiz_id
-                      WHERE user_id = %s AND question = %s AND réponse = %s AND titre = %s""",
-                       (session.get("user_id"), question, reponse, dossier), fetch=True):
-                       
+                      WHERE user_id = %s AND question = %s AND réponse = %s AND explication = %s AND titre = %s""",
+                       (session.get("user_id"), question, reponse, explication, dossier), fetch=True):
+
             error_msg = "Cette question existe déjà dans ce dossier"
 
             return redirect(url_for('quiz.modify_quiz_questions', dossier=dossier, error_msg=error_msg, matiere=matiere))
@@ -509,11 +517,11 @@ def modify_quiz_questions():
             return apology("Quiz introuvable")
         quiz_id = quiz_id_row[0][0]
 
-        # On met à jour la question et la réponse dans la base de données
+        # On met à jour la question, la réponse et l'explication dans la base de données
         db_request("""UPDATE quiz_questions
-                   SET question = %s, réponse = %s WHERE quiz_id = %s
+                   SET question = %s, réponse = %s, explication = %s WHERE quiz_id = %s
                    AND question = %s AND réponse = %s""",
-                    (question, reponse, quiz_id, initial_question, initial_reponse,), fetch=False)
+                    (question, reponse, explication, quiz_id, initial_question, initial_reponse,), fetch=False)
 
         message = "Question modifiée avec succès"
         # Redirige vers la page de modification des questions du quiz privé 

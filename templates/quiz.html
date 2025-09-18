@@ -4,6 +4,103 @@
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" 
   rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='quiz_page.css') }}">
+  <style>
+    /* Styles pour le bouton "En savoir plus" */
+    .explanation-toggle-btn {
+      background: linear-gradient(135deg, #007bff, #0056b3);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.9em;
+      font-weight: 500;
+      cursor: pointer;
+      margin: 10px auto; /* Centrage avec margin auto */
+      display: block; /* Pour que margin auto fonctionne */
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
+    }
+    
+    .explanation-toggle-btn:hover {
+      background: linear-gradient(135deg, #0056b3, #003d82);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+    }
+    
+    .explanation-toggle-btn i {
+      margin-right: 6px;
+    }
+    
+  /* Styles pour le container d'explication */
+  .explanation-container {
+    background: linear-gradient(135deg, #f8f9ff, #e8f2ff);
+    border: 1px solid #d1e7ff;
+    border-radius: 12px;
+    margin-top: 15px;
+    padding: 0;
+    box-shadow: 0 3px 10px rgba(0, 123, 255, 0.1);
+    animation: slideDown 0.3s ease-out;
+  }
+  
+  .explanation-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    padding: 12px 16px;
+    border-radius: 12px 12px 0 0;
+    margin: 0;
+  }
+  
+  .explanation-header h5 {
+    margin-left: 40%;
+    font-size: 1.1em;
+    font-weight: 600;
+  }
+  
+  .explanation-header i {
+    margin-right: 8px;
+    color: #ffd700;
+  }
+  
+  .close-explanation-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+  }
+  
+  .close-explanation-btn:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+  
+  .explanation-content {
+    display :flex;
+    justify-content: center;
+    padding: 20px;
+    color: #333;
+    line-height: 1.6;
+    font-size: 1em;
+  }
+  
+  /* Animation simple */
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  </style>
 {% endblock %}
 
 {% block script %}
@@ -36,6 +133,20 @@
     </div>
     <div>
       <h1 id="feedback" role="alert"></h1>
+      
+      <!-- Bouton "En savoir plus" pour afficher l'explication -->
+      <button id="show-explanation-btn" class="explanation-toggle-btn" style="display: none;">
+        <i class="fas fa-info-circle"></i> En savoir plus
+      </button>
+
+      <!-- Div contenant l'explication (masqué par défaut) -->
+      <div id="explanation-container" class="explanation-container" style="display: none;">
+        <div class="explanation-header">
+          <h5><i class="fas fa-lightbulb"></i> Commentaire </h5>
+          <button id="close-explanation-btn" class="close-explanation-btn">&times;</button>
+        </div>
+        <div id="explanation-content" class="explanation-content"></div>
+      </div>
     </div>
     <h4 class="attendu" id="principe"><strong></strong></h4>
     <div class="fin" id="fin" hidden>
@@ -128,6 +239,21 @@
               });
           });
       });
+
+      function showExplanation() {
+    const explanationContainer = document.getElementById('explanation-container');
+    const explanationContent = document.getElementById('explanation-content');
+    
+    if (current_explication && current_explication.trim() !== '') {
+        explanationContent.textContent = current_explication;
+        explanationContainer.style.display = 'block';
+    }
+}
+
+function hideExplanation() {
+    const explanationContainer = document.getElementById('explanation-container');
+    explanationContainer.style.display = 'none';
+}
   </script>
 
 {% endblock %}

@@ -186,9 +186,18 @@
                     Réponse {{ loop.index }}
                   </label>
                   <input name="initial_answer" type="hidden" value="{{ question[1] }}">
-                  <textarea style="border: none;" class="form-control" name="réponse" rows="3" placeholder=
+                  <textarea style="border: none;" class="form-control" name="réponse" rows="2" placeholder=
                   "Entrez la référence du principe" maxlength="200" required>{{ question[1] }}</textarea>
                   <div class="char-count">0 / 200</div>
+              </div>
+              <div class="mb-3" style="position: relative;">
+                  <label for="message" class="form-label">
+                    Explication (optionnel)
+                  </label>
+                  <input name="initial_explanation" type="hidden" value="{{ question[2] }}">
+                  <textarea style="border: none;" class="form-control" name="explication" rows="3" placeholder=
+                  "Ajoutez une explication" maxlength="500">{% if question[2] and question[2]|string != 'None' and question[2]|string != 'null' and question[2]|trim %}{{ question[2] }}{% endif %}</textarea>
+                  <div class="char-count">0 / 500</div>
               </div>
               <button class="btn btn-primary" style="background: linear-gradient(90deg, 
               #00bcd4, #0097a7); border: none;" type="submit">

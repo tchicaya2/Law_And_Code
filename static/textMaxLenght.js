@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded", function() {
     document.querySelectorAll('textarea.form-control').forEach(function(textarea) {
         // Cherche le compteur juste après le textarea
         const count = textarea.parentElement.querySelector('.char-count');
+        console.log(count, "is found for", textarea.value);
         // Fonction de mise à jour du compteur
         function updateCount() {
             if (count.previousElementSibling.getAttribute('name') === 'question') {
@@ -11,6 +12,9 @@ document.addEventListener("DOMContentLoaded", function() {
             } else if (count.previousElementSibling.getAttribute('name') === 'réponse') {
                 count.textContent = `${textarea.value.length} / 200`;
             } else if (count.previousElementSibling.getAttribute('name') === 'msg') {
+                count.textContent = `${textarea.value.length} / 500`;
+            }
+             else if (count.previousElementSibling.getAttribute('name') === 'explication') {
                 count.textContent = `${textarea.value.length} / 500`;
             }
         }

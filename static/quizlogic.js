@@ -8,8 +8,10 @@ let bonne_réponse;
 let titre;
 let matiere;
 let quizMap = new Map();
+let explanationMap = new Map(); // Pour stocker les explications
 let selectible = [];
 let score, score_final;
+let current_explication = null; // Variable globale pour l'explication courante
 
 // // Récupérer les arrêts associés à la matière choisie par l'utilisateur
 async function getArrets(){ 
@@ -42,6 +44,10 @@ async function main(){
     // Remplir une liste ("selectible") avec tous les noms d'arrêts
     for (let arret of arrets){
         quizMap.set(arret[0], arret[1]); // On associe arret et principe dans un tuple
+        // Stocker les explications (arret[2] contient l'explication)
+        if (arret[2] && arret[2].trim() !== '' && arret[2] !== 'None') {
+            explanationMap.set(arret[0], arret[2]);
+        }
     }
     for (let[key, value] of quizMap){
         // On remplit la liste selectible avec les noms d'arrêts
@@ -74,8 +80,19 @@ function set_and_ask(){
     totalQuestions = document.getElementById("total-questions");
     let progressBar = document.getElementById("progress-bar");
     let progressText = document.getElementById("progress-text");
+    // Éléments pour les explications
+    let showExplanationBtn = document.getElementById("show-explanation-btn");
+    let closeExplanationBtn = document.getElementById("close-explanation-btn");
     let asked = [];
     let options = [];
+    
+    // Gérer les événements pour les explications
+    if (showExplanationBtn) {
+        showExplanationBtn.addEventListener("click", showExplanation);
+    }
+    if (closeExplanationBtn) {
+        closeExplanationBtn.addEventListener("click", hideExplanation);
+    }
 
     essais.textContent = chances;
     let état = {
@@ -203,6 +220,11 @@ function poser_question(pcp, r1, r2, r3, r4, score, essais, feedback,
     progressBar.style.width = progressPercent + '%';
     progressText.textContent = `${asked.length} / ${total}`;
     
+    // Masquer le bouton d'explication et l'explication de la question précédente
+    hideExplanationButton();
+    hideExplanation();
+    current_explication = null;
+    
     labels.forEach(function (label) {
         // On retire la couleur verte appliqué à la bonne réponse
         label.parentElement.classList.remove("trouvé"); 
@@ -271,6 +293,11 @@ function vérifier_réponse(event, état, feedback, score, suivant, asked, bonne
             setTimeout(() => {
                 scoreBox.classList.remove('pulse');
             }, 800);
+            
+            // Mettre à jour l'explication courante et afficher le bouton si nécessaire
+            current_explication = explanationMap.get(bonne_réponse) || null;
+            showExplanationButton();
+            
             // Une fois la réponse vérifiée et juste, 
             // on affiche le bouton "suivant" qui en cas de clic déclenche poser_question
             // qui est la fonction qui affiche la question suivante 
@@ -311,6 +338,11 @@ function vérifier_réponse(event, état, feedback, score, suivant, asked, bonne
             setTimeout(() => {
                 essaisBox.classList.remove('pulse');
             }, 800);
+            
+            // Mettre à jour l'explication courante et afficher le bouton si nécessaire
+            current_explication = explanationMap.get(bonne_réponse) || null;
+            showExplanationButton();
+            
             état.bouttons_inactifs = true;
             feedback.style.color = "red";
             feedback.style.margin = "10px";
@@ -354,3 +386,20 @@ function vérifier_réponse(event, état, feedback, score, suivant, asked, bonne
         }
     }
 }
+
+// Fonctions pour gérer les explications
+function showExplanationButton() {
+    const showExplanationBtn = document.getElementById('show-explanation-btn');
+    if (showExplanationBtn && current_explication && current_explication.trim() !== '' && current_explication !== 'None') {
+        showExplanationBtn.style.display = 'block';
+    }
+}
+
+function hideExplanationButton() {
+    const showExplanationBtn = document.getElementById('show-explanation-btn');
+    if (showExplanationBtn) {
+        showExplanationBtn.style.display = 'none';
+    }
+}
+
+
