@@ -448,7 +448,7 @@ def modify_quiz_questions():
         error_msg = request.args.get("error_msg") if request.args.get("error_msg") else None
 
         if not arg_is_present([dossier, matiere]):
-            return apology("Dossier ou matière manquant")
+            return apology("Dossier ou matière manquant(e)")
 
         if not access or not niveau:
             niveau_and_access = db_request("SELECT niveau, type FROM quiz_infos WHERE titre = %s AND user_id = %s",
