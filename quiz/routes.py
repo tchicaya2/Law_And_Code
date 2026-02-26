@@ -454,7 +454,7 @@ def modify_quiz_questions():
             niveau_and_access = db_request("SELECT niveau, type FROM quiz_infos WHERE titre = %s AND user_id = %s",
                            (dossier, session.get("user_id"),), fetch=True)
             
-            if not niveau_and_access: # Le quiz n'existe probablement pas
+            if not niveau_and_access: # Le quiz n'existe probablement pas 
                 return apology("Quiz introuvable")
 
             niveau = niveau_and_access[0][0]  # On récupère le niveau
