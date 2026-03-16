@@ -457,7 +457,7 @@ def modify_quiz_questions():
             if not niveau_and_access: # Le quiz n'existe probablement pas 
                 return apology("Quiz introuvable")
 
-            niveau = niveau_and_access[0][0]  # On récupère le niveau
+            niveau = niveau_and_access[0][0]  # On récupère le niveaux du quiz
             access = niveau_and_access[0][1]  # On récupère le type d'accès (public ou privé)
         
         rows = db_request("""SELECT question, réponse, explication FROM quiz_questions 

@@ -15374,3 +15374,13 @@ rome.devtools.json HTTP/1.1\u001b[0m\" 404 -", "module": "_internal", "function"
 {"timestamp": "2026-02-26T16:36:11.064939", "level": "INFO", "message": "Configuration de la cl\u00e9 secr\u00e8te termin\u00e9e", "module": "app", "function": "<module>", "line": 37}
 {"timestamp": "2026-02-26T16:36:11.115679", "level": "INFO", "message": "Pool de connexions base de donn\u00e9es initialis\u00e9", "module": "app", "function": "<module>", "line": 71}
 {"timestamp": "2026-02-26T16:36:11.120568", "level": "INFO", "message": "Tous les blueprints enregistr\u00e9s", "module": "app", "function": "<module>", "line": 90}
+{"timestamp": "2026-03-16T09:11:41.310253", "level": "INFO", "message": "Application Flask initialis\u00e9e", "module": "app", "function": "<module>", "line": 30}
+{"timestamp": "2026-03-16T09:11:41.457736", "level": "INFO", "message": "\u2705 Sentry initialis\u00e9 - Environment: testing", "module": "sentry_simple", "function": "init_sentry", "line": 44}
+{"timestamp": "2026-03-16T09:11:41.457997", "level": "INFO", "message": "Configuration de la cl\u00e9 secr\u00e8te termin\u00e9e", "module": "app", "function": "<module>", "line": 37}
+{"timestamp": "2026-03-16T09:11:41.563247", "level": "INFO", "message": "Pool de connexions base de donn\u00e9es initialis\u00e9", "module": "app", "function": "<module>", "line": 71}
+{"timestamp": "2026-03-16T09:11:41.566984", "level": "INFO", "message": "Tous les blueprints enregistr\u00e9s", "module": "app", "function": "<module>", "line": 90}
+{"timestamp": "2026-03-16T09:11:45.356304", "level": "INFO", "message": "Application Flask initialis\u00e9e", "module": "app", "function": "<module>", "line": 30}
+{"timestamp": "2026-03-16T09:11:45.441861", "level": "INFO", "message": "\u2705 Sentry initialis\u00e9 - Environment: testing", "module": "sentry_simple", "function": "init_sentry", "line": 44}
+{"timestamp": "2026-03-16T09:11:45.442132", "level": "INFO", "message": "Configuration de la cl\u00e9 secr\u00e8te termin\u00e9e", "module": "app", "function": "<module>", "line": 37}
+{"timestamp": "2026-03-16T09:11:45.447621", "level": "INFO", "message": "Pool de connexions base de donn\u00e9es initialis\u00e9", "module": "app", "function": "<module>", "line": 71}
+{"timestamp": "2026-03-16T09:11:45.451256", "level": "INFO", "message": "Tous les blueprints enregistr\u00e9s", "module": "app", "function": "<module>", "line": 90}
