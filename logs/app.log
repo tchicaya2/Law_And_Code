@@ -15389,3 +15389,8 @@ rome.devtools.json HTTP/1.1\u001b[0m\" 404 -", "module": "_internal", "function"
 {"timestamp": "2026-04-01T23:28:32.879456", "level": "INFO", "message": "Configuration de la cl\u00e9 secr\u00e8te termin\u00e9e", "module": "app", "function": "<module>", "line": 37}
 {"timestamp": "2026-04-01T23:28:32.915143", "level": "INFO", "message": "Pool de connexions base de donn\u00e9es initialis\u00e9", "module": "app", "function": "<module>", "line": 71}
 {"timestamp": "2026-04-01T23:28:32.919537", "level": "INFO", "message": "Tous les blueprints enregistr\u00e9s", "module": "app", "function": "<module>", "line": 90}
+{"timestamp": "2026-04-24T23:16:12.007510", "level": "INFO", "message": "Application Flask initialis\u00e9e", "module": "app", "function": "<module>", "line": 30}
+{"timestamp": "2026-04-24T23:16:12.137073", "level": "INFO", "message": "\u2705 Sentry initialis\u00e9 - Environment: testing", "module": "sentry_simple", "function": "init_sentry", "line": 44}
+{"timestamp": "2026-04-24T23:16:12.137337", "level": "INFO", "message": "Configuration de la cl\u00e9 secr\u00e8te termin\u00e9e", "module": "app", "function": "<module>", "line": 37}
+{"timestamp": "2026-04-24T23:16:12.188900", "level": "INFO", "message": "Pool de connexions base de donn\u00e9es initialis\u00e9", "module": "app", "function": "<module>", "line": 71}
+{"timestamp": "2026-04-24T23:16:12.193667", "level": "INFO", "message": "Tous les blueprints enregistr\u00e9s", "module": "app", "function": "<module>", "line": 90}

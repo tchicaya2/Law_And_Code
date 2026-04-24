@@ -466,7 +466,7 @@ def modify_quiz_questions():
                           (dossier, session.get("user_id"),))
 
         # Si le dossier est vide, alors c'est un nouveau dossier que l'utilisateur veut créer
-        # On renvoie donc la page de modification de questions pour ce nouveau dossier 
+        # On renvoie donc la page de modification de questions pour ce nouveau dossier
         if not rows: 
             return render_template("modify_questions.html", dossier=dossier, 
                                access=access, message=message, error_msg=error_msg, 
